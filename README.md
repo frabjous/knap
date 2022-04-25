@@ -295,9 +295,9 @@ The precise values are listed below, here using the lua syntax (though the synta
     markdowntopdfviewerrefresh = "none",
     texoutputext = "pdf",
     textopdf = "pdflatex -interaction=batchmode -halt-on-error -synctex=1 %docroot%",
-    textopdfviewerlaunch = "sioyek --inverse-search 'nvim --headless -es --cmd \"lua require('\"'\"'knaphelper'\"'\"').relayjump('\"'\"'%servername%'\"'\"','\"'\"'%1'\"'\"',%2,0)\"' --reuse-instance %outputfile%",
+    textopdfviewerlaunch = "sioyek --inverse-search 'nvim --headless -es --cmd \"lua require('\"'\"'knaphelper'\"'\"').relayjump('\"'\"'%servername%'\"'\"','\"'\"'%1'\"'\"',%2,%3)\"' --reuse-instance %outputfile%",
     textopdfviewerrefresh = "none",
-    textopdfforwardjump = "sioyek --inverse-search 'nvim --headless -es --cmd \"lua require('\"'\"'knaphelper'\"'\"').relayjump('\"'\"'%servername%'\"'\"','\"'\"'%1'\"'\"',%2,0)\"' --reuse-instance --forward-search-file %srcfile% --forward-search-line %line% %outputfile%",
+    textopdfforwardjump = "sioyek --inverse-search 'nvim --headless -es --cmd \"lua require('\"'\"'knaphelper'\"'\"').relayjump('\"'\"'%servername%'\"'\"','\"'\"'%1'\"'\"',%2,%3)\"' --reuse-instance --forward-search-file %srcfile% --forward-search-line %line% %outputfile%",
     textopdfshorterror = "A=%outputfile% ; LOGFILE=\"${A%.pdf}.log\" ; rubber-info \"$LOGFILE\" 2>&1 | head -n 1",
     delay = 250
 }
@@ -347,7 +347,7 @@ function XeLaTeXCheck()
         if !exists("b:knap_settings") 
             let b:knap_settings = {}
         endif
-        let b:knap_settings["textopdf"] = "xelatex -interaction=batchmode -halt-on-error %docroot%"
+        let b:knap_settings["textopdf"] = "xelatex -interaction=batchmode -halt-on-error -synctex=1 %docroot%"
 endfunction
 autocmd BufRead *.tex call XeLaTeXCheck()
 ```
