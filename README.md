@@ -68,8 +68,7 @@ require "paq" {
     "frabjous/knap";
 }
 ```
-
-Different package managers handle this somewhat differently, so read the documentation for yours.
+Different package managers work a little differently, so be sure to check the documentation for yours.
 
 #### Other Requirements
 
