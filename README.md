@@ -54,18 +54,18 @@ Using git, simply clone this repo into an appropriate spot in your neovim runtim
 ```sh
 $ mkdir -p ~/.local/share/nvim/site/pack/plugins/start
 $ cd ~/.local/share/nvim/site/pack/plugins/start
-$ git clone --depth 1 https://bitbucket.org/frabjous/knap.git
+$ git clone --depth 1 https://github.com/frabjous/knap.git
 
 ```
 
 #### With a Neovim Package Manager
 
-I haven't really tested them, but I believe knap can be installed with most neovim package managers. However, since this repo is not on GitHub, you will need to specify the complete url. For example, with [paq](https://github.com/savq/paq-nvim) you can put:
+I believe knap can be installed with most neovim package managers. For example, with [paq](https://github.com/savq/paq-nvim) you can put:
 
 ```lua
 require "paq" {
     "savq/paq-nvim";
-    { url = "https://bitbucket.com/frabjous/knap.git" };
+    "frabjous/knap";
 }
 ```
 
