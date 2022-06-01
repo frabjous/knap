@@ -257,7 +257,15 @@ end
 -- see if a process is still running
 function is_running(pid)
     -- use ps to see if process is active
-    running = os.execute('ps -p ' .. tostring(pid) .. ' &> /dev/null')
+    local running = os.execute('ps -p ' .. tostring(pid) .. ' &> /dev/null')
+    if (running == 0) then
+        return true
+    end
+    if not (b:knap_viewer_refresh_cmd) then
+        return false
+    end
+    local procname = vim.split(b:knap_viewer_refresh_cmd, ' ')[1];
+    local running = os.execute('pgrep "' .. procname .. '" &> /dev/null')
     return (running == 0)
 end
 
@@ -321,8 +329,7 @@ function on_exit(jobid, exitcode, event)
     -- check if process was succesful
     if (exitcode == 0) then
         -- process was successful
-        if (vim.b.knap_viewer_launched) and 
-           (is_running(vim.b.knap_viewerpid)) then
+        if (vim.b.knap_viewer_launched) then
             -- if viewer launched already, refresh it
             print("process successful; refreshing preview")
             refresh_viewer()
