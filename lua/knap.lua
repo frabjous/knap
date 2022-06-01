@@ -261,10 +261,10 @@ function is_running(pid)
     if (running == 0) then
         return true
     end
-    if not (b:knap_viewer_refresh_cmd) then
+    if not (vim.b.knap_viewer_refresh_cmd) then
         return false
     end
-    local procname = vim.split(b:knap_viewer_refresh_cmd, ' ')[1];
+    local procname = vim.split(vim.b.knap_viewer_refresh_cmd, ' ')[1];
     local running = os.execute('pgrep "' .. procname .. '" &> /dev/null')
     return (running == 0)
 end
