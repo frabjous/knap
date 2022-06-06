@@ -26,6 +26,11 @@ local api = vim.api
 -- set variable for update timer
 local knaptimer = vim.loop.new_timer()
 
+-- determine maximum width of messages
+local ffi=require('ffi')
+ffi.cdef('int sc_col;')
+local knap_max_col_width = (ffi.C.sc_col - 1)
+
 -- this function attaches listeners to buffer events for changes to
 -- the text starts the timer to update the preview
 function attach_to_changes()
@@ -120,8 +125,8 @@ function close_viewer()
             tostring(vim.b.knap_viewerpid) .. ' &> /dev/null')
         -- above returns exit code of kill command
         if not (waskilled == 0) then
-            api.nvim_echo({{"Could not kill process " ..
-                tostring(vim.b.knap_viewerpid), 'ErrorMsg'}}, true, {})
+            err_msg("Could not kill process " ..
+                tostring(vim.b.knap_viewerpid))
         end
     end
     -- mark viewer closed and stop autopreviewing if on
@@ -135,6 +140,11 @@ function dirname(fn)
         return '.'
     end
     return fn:gsub('/[^/]*$','')
+end
+
+-- function for display error messages
+function err_msg(msg)
+    api.nvim_echo({{msg:sub(1, knap_max_col_width), 'ErrMsg'}}, true, {})
 end
 
 -- fills in the %variable%-style variables in the defined routines
@@ -171,24 +181,21 @@ function forward_jump()
     end
     -- ensure there is a routine set
     if not (vim.b.knap_routine) then
-        api.nvim_echo({{"No routine set. " ..
-            "Process at least once first.", 'ErrorMsg'}}, true, {})
+        err_msg("No routine set. Process at least once first.")
         return
     end
     -- make sure viewer is still running
     if not (vim.b.knap_viewerpid) or
        not (is_running(vim.b.knap_viewerpid)) then
-        api.nvim_echo({{"Viewer not currently active.",'ErrorMsg'}},
-            true,{})
+        err_msg("Viewer not currently active.")
         mark_viewer_closed()
         return
     end
     --get forward jump command; return if nil
     local fjcmd = vim.b.knap_settings[vim.b.knap_routine .. "forwardjump"]
     if not (fjcmd) then
-        api.nvim_echo({{"No forward jump method has been " ..
-            "defined for routine " .. vim.b.knap_routine .. ".",
-            'ErrorMsg'}},true,{})
+        err_msg("No forward jump method has been defined for routine " ..
+            vim.b.knap_routine .. ".")
         return
     end
     -- fill in details of command
@@ -197,8 +204,7 @@ function forward_jump()
     local result = os.execute(fjcmd .. ' &> /dev/null')
     -- report if error
     if not (result == 0) then
-        api.nvim_echo({{"Jump command not successful. (Cmd: " ..
-            fjcmd .. ")","ErrorMsg"}},true,{})
+        err_msg("Jump command not successful. (Cmd: " .. fjcmd .. ")")
     end
 end
 
@@ -238,15 +244,14 @@ end
 function get_outputfile()
     -- make sure docroot is set
     if not (vim.b.knap_docroot) then
-        api.nvim_echo({{"Could not read document root filename. " ..
-            "Is it set?",'ErrorMsg'}},true,{})
+        err_msg("Could not read document root filename. Is it set?")
         return 'unknown'
     end
     -- get extension of docroot and its output extension
     local docrootext = get_extension_or_ft(vim.b.knap_docroot)
     if not (vim.b.knap_settings[docrootext .. 'outputext']) then
-        api.nvim_echo({{"Could not determine output type. Is one " ..
-        "set for " .. docrootext .. " files?",'ErrorMsg'}},true,{})
+        err_msg("Could not determine output type. Is one set for " ..
+            .. docrootext .. " files?")
         return 'unknown'
     end
     local outputext = vim.b.knap_settings[docrootext .. 'outputext'];
@@ -297,7 +302,7 @@ function launch_viewer()
     lproc:close()
     -- if couldn't read pid then it was a failure
     if not (vpid) or (vpid == '') then
-        api.nvim_echo({{"Could not launch viewer.",'ErrorMsg'}}, true, {})
+        err_msg("Could not launch viewer.")
         mark_viewer_closed()
         return
     end
@@ -353,7 +358,7 @@ function on_exit(jobid, exitcode, event)
             local errproc = io.popen(shorterrcmd)
             local errmsg = vim.trim(errproc:read("*a"))
             errproc:close()
-            api.nvim_echo({{'ERR: ' .. errmsg, 'ErrorMsg'}},true,{})
+            err_msg('ERR: ' .. errmsg)
         end
     end
     --  check once more in case there are new edits
@@ -386,8 +391,8 @@ function process_once()
     end
     -- check if another process is currently underway
     if (vim.b.knap_currently_processing) then
-        api.nvim_echo({{'Another process is currently underway. ' ..
-            'Kill it first if need be.','ErrorMsg'}},true,{})
+        err_msg('Another process is currently underway. ' ..
+            'Kill it first if need be.')
         return
     end
     -- start processing the document
@@ -405,7 +410,7 @@ function refresh_viewer()
     -- check if viewer is still open
     if not (vim.b.knap_viewerpid) or
         not (is_running(vim.b.knap_viewerpid)) then
-        api.nvim_echo({{'Viewer is not open.','ErrorMsg'}},true,{})
+        err_msg('Viewer is not open.')
         mark_viewer_closed()
         return
     end
@@ -414,8 +419,7 @@ function refresh_viewer()
         ' &> /dev/null')
     -- report if error
     if not (succ == 0) then
-        api.nvim_echo({{'Error when attempting to refresh viewer.',
-            'ErrMsg'}},true,{})
+        err_msg('Error when attempting to refresh viewer.')
     end
 end
 
