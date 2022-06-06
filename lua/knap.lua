@@ -47,8 +47,8 @@ function attach_to_changes()
     )
     -- api.nvim_buf_attach returns false if attaching did not succeed
     if not (succ) then
-        api.nvim_echo({{'Could not attach to buffer changes. ' ..
-            'Autopreviewing not activated.','ErrorMsg'}},true,{})
+        err_msg('Could not attach to buffer changes. ' ..
+            'Autopreviewing not activated.')
         stop_autopreviewing(false)
     end
 end
@@ -144,7 +144,7 @@ end
 
 -- function for display error messages
 function err_msg(msg)
-    api.nvim_echo({{msg:sub(1, knap_max_col_width), 'ErrMsg'}}, true, {})
+    api.nvim_echo({{msg:sub(1, knap_max_col_width), 'ErrorMsg'}}, true, {})
 end
 
 -- fills in the %variable%-style variables in the defined routines
@@ -251,7 +251,7 @@ function get_outputfile()
     local docrootext = get_extension_or_ft(vim.b.knap_docroot)
     if not (vim.b.knap_settings[docrootext .. 'outputext']) then
         err_msg("Could not determine output type. Is one set for " ..
-            .. docrootext .. " files?")
+            docrootext .. " files?")
         return 'unknown'
     end
     local outputext = vim.b.knap_settings[docrootext .. 'outputext'];
@@ -348,9 +348,7 @@ function on_exit(jobid, exitcode, event)
         if (settings[vim.b.knap_routine .. "shorterror"] == nil) then
             -- no shorterror routine defined; report some of stderr
             local width = api.nvim_win_get_width(0)
-            api.nvim_echo({{'ERR: ' ..
-                vim.b.knap_process_stderr:sub(0,width-20), 'ErrorMsg'}},
-                true,{})
+            err_msg('ERR: ' .. vim.b.knap_process_stderr)
         else
             -- print result of short error command for routine
             local shorterrcmd = fill_in_cmd(settings[vim.b.knap_routine ..
@@ -460,18 +458,16 @@ function set_variables()
         'to' .. get_extension(vim.b.knap_outputfile)
     local routinecmd = vim.b.knap_settings[vim.b.knap_routine]
     if not (routinecmd) then
-        api.nvim_echo({{'Could not determine processing cmd for ' ..
-            vim.b.knap_routine .. '. Is one set?', 'ErrorMsg'}},
-            true, {})
+        err_msg('Could not determine processing cmd for ' ..
+            vim.b.knap_routine .. '. Is one set?')
         return false
     end
     vim.b.knap_processing_cmd = fill_in_cmd(routinecmd)
     -- set viewer launch command or ragequit
     local vlcmd = vim.b.knap_settings[vim.b.knap_routine .. 'viewerlaunch']
     if not (vlcmd) then
-        api.nvim_echo({{'Could not determine viewing command for ' ..
-            vim.b.knap_routine .. '. Is one set?', 'ErrorMsg'}},
-            true,{})
+        err_msg('Could not determine viewing command for ' ..
+            vim.b.knap_routine .. '. Is one set?')
         return false
     end
     vim.b.knap_viewer_launch_cmd = fill_in_cmd(vlcmd)
