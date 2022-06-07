@@ -19,8 +19,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     ]]--
 
--- get path of script running
-local knappath = debug.getinfo(1).source:match("@?(.*/)")
 -- shorter name for api
 local api = vim.api
 -- set variable for update timer
@@ -449,7 +447,7 @@ function set_variables()
     end
     -- set outputfile or ragequit
     vim.b.knap_outputfile = get_outputfile()
-    if not (vim.b.knap_outputfile) or 
+    if not (vim.b.knap_outputfile) or
         (vim.b.knap_outputfile == 'unknown') then
         return false
     end
