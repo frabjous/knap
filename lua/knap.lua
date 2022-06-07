@@ -119,7 +119,7 @@ function close_viewer()
         buffer_init()
     end
     if (vim.b.knap_viewerpid) and (is_running(vim.b.knap_viewerpid)) then
-        local waskilled = os.execute('kill ' .. 
+        local waskilled = os.execute('kill ' ..
             tostring(vim.b.knap_viewerpid) .. ' &> /dev/null')
         -- above returns exit code of kill command
         if not (waskilled == 0) then
@@ -151,17 +151,17 @@ function fill_in_cmd(cmd)
     -- replace %fields% in cmd with values
     local pos = api.nvim_win_get_cursor(0)
     local row, col = pos[1], pos[2]
-    -- local srcfile = basename(api.nvim_buf_get_name(0))
     local srcfile = api.nvim_buf_get_name(0)
     cmd = cmd:gsub('%%column%%', tostring(col))
             :gsub('%%line%%', tostring(row))
             :gsub('%%srcfile%%', '"' .. srcfile .. '"')
-    if (vim.b.knap_docrootbase) then
-        cmd = cmd:gsub('%%docroot%%', '"' .. vim.b.knap_docrootbase .. '"')
+    if (vim.b.knap_docroot) then
+        cmd = cmd:gsub('%%docroot%%', '"' ..
+            basename(vim.b.knap_docroot) .. '"')
     end
     if (vim.b.knap_outputfile) then
         cmd = cmd:gsub('%%outputfile%%',
-            '"' .. vim.b.knap_outputfile .. '"')
+            '"' .. basename(vim.b.knap_outputfile) .. '"')
     end
     if (vim.b.knap_viewerpid) then
         cmd = cmd:gsub('%%pid%%', vim.b.knap_viewerpid)
@@ -201,8 +201,8 @@ function forward_jump()
     fjcmd = fill_in_cmd(fjcmd)
     print("Attempting to jump to matching location.")
     local fjprecmd = ''
-    if (vim.b.knap_docrootdir) then
-        fjprecmd = 'cd "' .. vim.b.knap_docrootdir .. '" && '
+    if (vim.b.knap_docroot) then
+        fjprecmd = 'cd "' .. dirname(vim.b.knap_docroot) .. '" && '
     end
     local result = os.execute(fjprecmd .. fjcmd .. ' &> /dev/null')
     -- report if error
@@ -216,13 +216,24 @@ end
 function get_docroot()
     -- look through first five lines for 'root = '
     local fivelines = vim.api.nvim_buf_get_lines(0, 0, 5, false)
+    local specified=''
     for l,line in ipairs(fivelines) do
         if line:match('[Rr][Oo][Oo][Tt]%s*=') then
-            return line:gsub('^.*[Rr][Oo][Oo][Tt]%s*=%s*','')
+            specified=line:gsub('^.*[Rr][Oo][Oo][Tt]%s*=%s*','')
                 :gsub('%s*$','')
+            break
         end
     end
-    return basename(api.nvim_buf_get_name(0))
+    -- if nothing found, return sourcefile
+    if (specified == '') then
+        return api.nvim_buf_get_name(0)
+    end
+    -- if absolute path given, return it
+    if (specified:sub(1,1) == '/') then
+        return specified
+    end
+    -- otherwise, combine paths
+    return dirname(api.nvim_buf_get_name(0)) .. '/' .. specified
 end
 
 -- get the extension part of a filename
@@ -299,6 +310,9 @@ end
 function launch_viewer()
     -- launch viewer in background and echo pid
     local lcmd = vim.b.knap_viewer_launch_cmd .. ' &> /dev/null & echo $!'
+    if (vim.b.knap_docroot) then
+        lcmd = 'cd "' .. dirname(vim.b.knap_docroot) .. '" && ' .. lcmd
+    end
     local lproc = io.popen(lcmd)
     -- try to read pid
     local vpid = lproc:read()
@@ -356,6 +370,10 @@ function on_exit(jobid, exitcode, event)
             -- print result of short error command for routine
             local shorterrcmd = fill_in_cmd(settings[vim.b.knap_routine ..
                 "shorterror"])
+            if (vim.b.knap_docroot) then
+                shorterrcmd = 'cd "' .. dirname(vim.b.knap_docroot) .. '" && '
+                    .. shorterrcmd
+            end
             local errproc = io.popen(shorterrcmd)
             local errmsg = vim.trim(errproc:read("*a"))
             errproc:close()
@@ -416,8 +434,11 @@ function refresh_viewer()
         return
     end
     -- execute refresh command
-    local succ = os.execute(vim.b.knap_viewer_refresh_cmd ..
-        ' &> /dev/null')
+    local rcmd = vim.b.knap_viewer_refresh_cmd .. ' &> /dev/null'
+    if (vim.b.knap_docroot) then
+        rcmd = 'cd "' .. dirname(vim.b.knap_docroot) .. '" && ' .. rcmd
+    end
+    local succ = os.execute(rcmd)
     -- report if error
     if not (succ == 0) then
         err_msg('Error when attempting to refresh viewer.')
@@ -511,7 +532,12 @@ function start_processing()
         return
     end
     -- determine working folder as dirname of edited file
-    local workingdir = dirname(api.nvim_buf_get_name(0))
+    local workingdir = ''
+    if (vim.b.knap_docroot) then
+        workingdir = dirname(vim.b.knap_docroot)
+    else
+        workingdir = dirname(api.nvim_buf_get_name(0))
+    end
     -- start process job
     vim.b.knap_process_job = vim.fn.jobstart(
         vim.b.knap_processing_cmd, {
