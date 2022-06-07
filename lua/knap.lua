@@ -151,12 +151,13 @@ function fill_in_cmd(cmd)
     -- replace %fields% in cmd with values
     local pos = api.nvim_win_get_cursor(0)
     local row, col = pos[1], pos[2]
-    local srcfile = basename(api.nvim_buf_get_name(0))
+    -- local srcfile = basename(api.nvim_buf_get_name(0))
+    local srcfile = api.nvim_buf_get_name(0)
     cmd = cmd:gsub('%%column%%', tostring(col))
             :gsub('%%line%%', tostring(row))
             :gsub('%%srcfile%%', '"' .. srcfile .. '"')
-    if (vim.b.knap_docroot) then
-        cmd = cmd:gsub('%%docroot%%', '"' .. vim.b.knap_docroot .. '"')
+    if (vim.b.knap_docrootbase) then
+        cmd = cmd:gsub('%%docroot%%', '"' .. vim.b.knap_docrootbase .. '"')
     end
     if (vim.b.knap_outputfile) then
         cmd = cmd:gsub('%%outputfile%%',
@@ -199,7 +200,11 @@ function forward_jump()
     -- fill in details of command
     fjcmd = fill_in_cmd(fjcmd)
     print("Attempting to jump to matching location.")
-    local result = os.execute(fjcmd .. ' &> /dev/null')
+    local fjprecmd = ''
+    if (vim.b.knap_docrootdir) then
+        fjprecmd = 'cd "' .. vim.b.knap_docrootdir .. '" && '
+    end
+    local result = os.execute(fjprecmd .. fjcmd .. ' &> /dev/null')
     -- report if error
     if not (result == 0) then
         err_msg("Jump command not successful. (Cmd: " .. fjcmd .. ")")
