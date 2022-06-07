@@ -176,9 +176,9 @@ Settings of the form `[routine]viewerlaunch` determine what command is used to i
 When invoked, the appropriate substitutions are made for these variables:
 
 ```text
- %srcfile%     the name of the file being edited
- %docroot%     the name of the root document that needs to be processed*
- %outputfile%  the name of the output file**
+ %srcfile%     the filename (full path) of the file being edited
+ %docroot%     the base name of the root document that needs to be processed*
+ %outputfile%  the base name of the output file**
  %pid%         the process id of the viewer program, after launch
  %line%        the line number of the cursor position in neovim
  %column%      the column number of the cursor position in neovim
@@ -191,7 +191,7 @@ When invoked, the appropriate substitutions are made for these variables:
 
 Quotation marks will be wrapped around the filename variables; do not put additional quotation marks around them. If you need to use quotation marks elsewhere in the commands, be sure to escape them as `\"` when setting them in your `init.vim`/`init.lua`.
 
-Note the commands are always invoked from within the folder of the root document.
+Note the commands are always invoked from within the directory of the root document, which may or may not be the same as the document being edited.
 
 KNAP sets no limitations on what routines are defined for what file extensions, or how many routines are set inside `g:knap_settings`. Use a single dictionary for all such settings. For example, to have a routine to create HTML files from Markdown `.md` files, create the settings "`mdoutputext`", "`mdtohtml`", "`mdtohtmlviewerlaunch`" and "`mdtohtmlviewerrefresh`". See the [defaults](#markdown-header-default-configuration) for examples.
 
@@ -431,7 +431,7 @@ let g:knap_settings = {
 \ }
 ```
 
-For SyncTeX reverse jumps, one cannot set it up to call a headless instance of neovim directly, as it outputs its arguments to its synctex-command in an incompatible way. One must make use of a helper script. One is provided by the plugin in the form of a luajit script called `synctex-inverse.lua` in the `llpp` subdirectory of the git repository. (It is assumed as a neovim user you have a luajit executable installed.) You should either copy this into a folder in your [`$PATH`](https://astrobiomike.github.io/unix/modifying_your_path), or add the llpp folder of the plugin repo to your `$PATH`, or call it using its full path. You can make it executable with `chmod a+x synctex-inverse.lua` if need be.
+For SyncTeX reverse jumps, one cannot set it up to call a headless instance of neovim directly, as it outputs its arguments to its synctex-command in an incompatible way. One must make use of a helper script. One is provided by the plugin in the form of a luajit script called `synctex-inverse.lua` in the `llpp` subdirectory of the git repository. (It is assumed as a neovim user you have a luajit executable installed.) You should either copy this into a directory in your [`$PATH`](https://astrobiomike.github.io/unix/modifying_your_path), or add the llpp directory of the plugin repo to your `$PATH`, or call it using its full path. You can make it executable with `chmod a+x synctex-inverse.lua` if need be.
 
 Set this lua script as your synctex-command in your `llpp.conf` file (typically at `~/.config/llpp.conf`), under "`<defaults`". If it is in your `$PATH` and executable you can simply do:
 
