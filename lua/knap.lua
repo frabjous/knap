@@ -364,7 +364,6 @@ function on_exit(jobid, exitcode, event)
         local settings = vim.b.knap_settings
         if (settings[vim.b.knap_routine .. "shorterror"] == nil) then
             -- no shorterror routine defined; report some of stderr
-            local width = api.nvim_win_get_width(0)
             err_msg('ERR: ' .. vim.b.knap_process_stderr)
         else
             -- print result of short error command for routine
