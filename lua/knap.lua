@@ -362,7 +362,8 @@ function on_exit(jobid, exitcode, event)
         end
     else
         local settings = vim.b.knap_settings
-        if (settings[vim.b.knap_routine .. "shorterror"] == nil) then
+        if ((settings[vim.b.knap_routine .. "shorterror"] == nil) or
+            (settings[vim.b.knap_routine .. "shorterror"] == "none")) then
             -- no shorterror routine defined; report some of stderr
             err_msg('ERR: ' .. vim.b.knap_process_stderr)
         else
