@@ -72,7 +72,7 @@ Different package managers work a little differently, so be sure to check the do
 
 #### Other Requirements
 
-Of course, you will also need whatever programs are needed for processing and viewing your files. For the [default configuration](#markdown-header-default-configuration), you'll need [Sioyek](https://sioyek.info) for viewing PDF output, [Falkon browser](https://www.falkon.org/) for html output, [pandoc](https://pandoc.org/) for processing markdown files and a TeX distribution such as [TeXlive](https://www.tug.org/texlive/) for LaTeX files. On Linux, check your package manager to see if these are available in your distro's repos. You don't necessarily need them if you want to use a custom configuration instead.
+Of course, you will also need whatever programs are needed for processing and viewing your files. For the [default configuration](#markdown-header-default-configuration), you'll need [Sioyek](https://sioyek.info) for viewing PDF output, [Falkon browser](https://www.falkon.org/) for html output, [pandoc](https://pandoc.org/) for processing markdown files and a TeX distribution such as [TeXlive](https://www.tug.org/texlive/) for LaTeX files, and [rubber](https://gitlab.com/latex-rubber/rubber/) for reporting LaTeX errors. On Linux, check your package manager to see if these are available in your distro's repos. You don't necessarily need them if you want to use a custom configuration instead.
 
 ## Invocation and Usage
 
