@@ -43,6 +43,7 @@ Live-preview of a markdown file, with the Falkon browser:
     - [Falkon](#falkon-recommended-browser)
     - [QuteBrowser](#qutebrowser)
     - [Firefox, Chrome, Chromium, etc.](#firefox-chrome-chromium-etc)
+    - [Using a Live Server (works with any browser)](#using-a-live-server-works-with-any-browser)
 * [License](#license)
 
 ## Installation
@@ -607,9 +608,7 @@ The main obstacle here is that you will need to set your window manager up to pr
 
 ### Firefox, Chrome, Chromium, etc.
 
-The mainstream browsers don't provide an easy way for an external application to refresh the displayed page if it is read directly with the `file://` protocol, at least short of using a webdriver.
-
-There are lots of potential workarounds for this, of greater and lesser complexity. Some other plugins solve this problem by serving the file from a minimal local webserver, and have the server refresh the file; knap could be set up to utilize something like this, but it would require external programs or scripts (in nodejs or python or similar) that I don't want to require as part of the core of knap.
+The mainstream browsers don't provide an easy way for an external application to refresh the displayed page if it is read directly with the `file://` protocol, at least short of using a webdriver. There are lots of potential workarounds for this, of greater and lesser complexity.
 
 A simple but kludgy way around this is to add a tag of the form `<meta http-equiv="refresh" content="1" >` inside the `<head>...</head>` of the html to instruct the browser to reload the page every second.
 
@@ -625,10 +624,31 @@ let g:knap_settings = {
     \ "mdtohtmlviewerrefresh": "none",
 \ }
 ```
-
 Replace `firefox` above with `chromium` or `google-chrome-stable`, etc., for other popular browsers.
 
-Personally I find just using Falkon to be a simpler approach.
+Personally I find just using Falkon to be a simpler approach. Another good alternative is using a live server; see below.
+
+### Using a Live Server (works with any browser)
+
+It is possible to set up a local webserver to serve the file you’re working on, and have it refresh the file when it changes. Unlike some plugins, knap does not come prebundled with one in order to stay minimal, but it can work in conjunction with such tools. For example, one may make use of the node-based [local-server](https://github.com/tapio/live-server) package by Tapio Vierros. (Follow the instructions in its README for installation.)
+
+One could then utilize settings such as the following:
+
+```vimspcript
+let g:knap_settings = {
+    "htmltohtmlviewerlaunch": "live-server --quiet --browser=firefox --open=%outputfile% --watch=%outputfile% --wait=800",
+    "htmltohtmlviewerrefresh": "none",
+    "mdtohtmlviewerlaunch": "live-server --quiet --browser=firefox --open=%outputfile% --watch=%outputfile% --wait=800",
+    "mdtohtmlviewerrefresh": "none",
+\ }
+```
+You can replace “`firefox`” with the executable name for whichever browser you would prefer to use. It is usually necessary to use the `--wait=` option for live-server to avoid it attempting to reload the output file file before it is completely written, but you may need to tweak the precise value (in milliseconds) depending on the speed of your processing routine.
+
+Note that knap spawns its viewer in the background, detached from the neovim process. In order to avoid leaving the server running after you exit neovim, you may wish to add an autocommand to kill all live-server instances upon exit. For instance, in your `init.vim` you could put:
+
+```vimscript
+autocmd BufUnload * lua if (vim.b.knap_viewerpid) then os.execute("pkill -f live-server") end
+```
 
 ## License
 
