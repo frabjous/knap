@@ -436,7 +436,7 @@ function refresh_viewer()
         return
     end
     -- execute refresh command
-    local rcmd = vim.b.knap_viewer_refresh_cmd .. ' &> /dev/null &'
+    local rcmd = '(' .. vim.b.knap_viewer_refresh_cmd .. ') &> /dev/null &'
     if (vim.b.knap_docroot) then
         rcmd = 'cd "' .. dirname(vim.b.knap_docroot) .. '" && ' .. rcmd
     end
