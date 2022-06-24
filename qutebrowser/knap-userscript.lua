@@ -21,19 +21,16 @@
     ]]--
 
 --[[
+
 NOTE: all this script does is record the path to the fifo pipe
-for the userscript in a place neovim/knap can find it later on
+for the userscript in a place neovim/knap can find it later on.
 
 Suggested use: activate this userscript when launching qutebrowser
 with an argument unique to the file being edited as part of your
 viewerlaunchcmd for the knap plugin; the viewerrefreshcmd can then
-send a refresh command to the pipe whose location is saved as
+send a refresh command to the pipe whose location is saved in
 /tmp/knap-[uniqueid]-qute-fifo, if need be using the tab index saved
 as /tmp/knap-[uniqueid]-tabindex. E.g.:
-
-
--- qutebrowser --target window /home/kck/res/test/test.html ':spawn --userscript knap-userscript.lua xxxqqqxxx'
--- echo ':run-with-count '$(</tmp/knap-xxxqqqxxx-qute-tabindex)' reload -f' > $(</tmp/knap-xxxqqqxxx-qute-fifo)
 
 --]]
 
