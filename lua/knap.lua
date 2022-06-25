@@ -67,7 +67,7 @@ function buffer_init()
     -- default settings if neither in buffer nor global settings
     local dsettings = {
         htmloutputext = "html",
-        htmltohtml = "touch %outputfile%",
+        htmltohtml = "none",
         htmltohtmlviewerlaunch = "falkon %outputfile%",
         htmltohtmlviewerrefresh = "none",
         mdoutputext = "html",

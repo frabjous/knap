@@ -270,7 +270,7 @@ They determine only the following routines:
 textopdf            uses pdflatex for processing and sioyek for viewing/refreshing
 mdtohtml (default)  uses pandoc for processing and falkon for viewing
 mdtopdf             uses pandoc for processing and sioyek for viewing
-htmltohtml          "touch %outputfile%" for processing; falkon for viewing
+htmltohtml          "none" for processing; falkon for viewing
 ```
 
 The precise values are listed below, here using the lua syntax (though the syntax for vimscript is quite close). You are, however, expected and encouraged to create your own, but comparison with the precise default values may be of some use:
@@ -278,7 +278,7 @@ The precise values are listed below, here using the lua syntax (though the synta
 ```lua
 {
     htmloutputext = "html",
-    htmltohtml = "touch %outputfile%",
+    htmltohtml = "none",
     htmltohtmlviewerlaunch = "falkon %outputfile%",
     htmltohtmlviewerrefresh = "none",
     mdoutputext = "html",
@@ -325,7 +325,7 @@ This might be useful for other sorts of tricks as well. For example, you could s
 
 Note that it is the *root* document’s extension that determines the routine used, so for the above CSS example, the routine is simply `htmltohtml`, and no separate `csstohtml` routine is required. The output file is also considered to have the same base name as the root document, not the edited document.
 
-However, in such a case, it might be better to use “`touch %outputfile%`” for the main processing command rather than simply “none” if the viewer relies on detecting changes to trigger an auto-refresh. Such is the case with the default configuration and Falkon. Only the CSS file is being changed, so the touch command is needed to mark the HTML file as changed as well, so the refresh will be triggered.
+However, in such a case, it might be better to use “`touch %outputfile%`” for the main processing command rather than simply “none” if the viewer relies on detecting changes to trigger an auto-refresh. Only the CSS file is being changed, so the touch command is needed to mark the HTML file as changed as well, so the refresh will be triggered.
 
 ## Buffer-Specific Settings / XeLaTeX Detection Example
 
