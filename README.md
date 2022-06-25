@@ -44,6 +44,7 @@ Live-preview of a markdown file, with the Falkon browser:
     - [QuteBrowser](#qutebrowser)
     - [Firefox, Chrome, Chromium, etc.](#firefox-chrome-chromium-etc)
     - [Using a Live Server (works with any browser)](#using-a-live-server-works-with-any-browser)
+* [Troubleshooting and Workarounds](#troubleshooting-and-workarounds)
 * [License](#license)
 
 ## Installation
@@ -595,16 +596,30 @@ let g:knap_settings = {
 
 [QuteBrowser project page](https://qutebrowser.org/)
 
-A running instance of qutebrowser can be refreshed with the `:reload` command, so you could try settings such as these:
+Qutebrowser is a highly configurable, keyboard-driven browser with a vim-inspired interface. Although it doesn’t auto-reload like Falkon does, it can be triggered to reload manually by means of its userscript ability. The knap package now comes with such a userscript. (Again, it is assumed as a neovim user you have a working luajit interpreter on your system.) To use it, locate the file `knap-userscript.lua` in the `qutebrowser/` subfolder of the knap plugin directory. Make it executable. Copy it into qutebrowser’s userscript directory, or create a symbolic link to it there. Depending on where knap was installed, and qutebrowser’s config files are located, the commands for this might be something like:
+
+```
+chmod a+x ~/.local/share/nvim/site/pack/plugins/start/knap/qutebrowser/knap-userscript.lua
+mkdir -p ~/.config/qutebrowser/userscripts
+ln -s ~/.local/share/nvim/site/pack/plugins/start/knap/qutebrowser/knap-userscript.lua \
+      ~/.config/qutebrowser/userscripts/knap-userscript.lua
+```
+
+You can set qutebrowser to start this userscript as part of the viewer launch command. The script creates uniquely named temporary files (based on its first argument) that allow knap to locate the FIFO pipe it can use to send qutebrowser refresh commands. The recommended settings for this are the following:
 
 ```vimscript
 let g:knap_settings = {
-    \ "mdtohtmlviewerlaunch" : "qutebrowser %outputfile%",
-    \ "mdtohtmlviewerrefresh" : "qutebrowser :reload",
+    \ "mdtohtmlviewerlaunch" : "SRC=%srcfile%; ID=\"${SRC//[^A-Za-z0-9]/_-_-}\"; qutebrowser --target window %outputfile% \":spawn --userscript knap-userscript.lua $ID\"",
+    \ "mdtohtmlviewerrefresh" : "SRC=%srcfile%; ID=\"${SRC//[^A-Za-z0-9]/_-_-}\"; echo ':run-with-count '$(</tmp/knap-$ID-qute-tabindex)' reload -f' > \"$(</tmp/knap-$ID-qute-fifo)\"",
+    \ "htmltohtml" : "none",
+    \ "htmltohtmlviewerlaunch" : "SRC=%srcfile%; ID=\"${SRC//[^A-Za-z0-9]/_-_-}\"; qutebrowser --target window %outputfile% \":spawn --userscript knap-userscript.lua $ID\"",
+    \ "htmltohtmlviewerrefresh" : "SRC=%srcfile%; ID=\"${SRC//[^A-Za-z0-9]/_-_-}\"; echo ':run-with-count '$(</tmp/knap-$ID-qute-tabindex)' reload -f' > \"$(</tmp/knap-$ID-qute-fifo)\"",
 \ }
 ```
 
-The main obstacle here is that you will need to set your window manager up to prevent qutebrowser from stealing focus. Whether and how you can do this depends on your window manager. There may be other solutions, as qutebrowser is really powerful, but I'm not that familiar with it myself.
+The first part of these commands creates a (most probably) unique identifier from the source file name to use as part of the temporary file names, and the same method is used later to locate these files to use their contents to arrange the refreshes.
+
+You might also consider using the [live server method](#using-a-live-server-works-with-any-browser) described below.
 
 ### Firefox, Chrome, Chromium, etc.
 
@@ -649,6 +664,10 @@ Note that knap spawns its viewer in the background, detached from the neovim pro
 ```vimscript
 autocmd BufUnload * lua if (vim.b.knap_viewerpid) then os.execute("pkill -f live-server") end
 ```
+
+## Troubleshooting and Workarounds
+
+The developers of the PDF viewers/browsers, etc., likely did not foresee their use for this purpose, and because of this problems can arise. 
 
 ## License
 
