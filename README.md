@@ -1,7 +1,7 @@
 
 # KNAP: Kevin's Neovim Auto-Previewer
 
-KNAP is a lua plugin for the [neovim](https://neovim.io/) text editor (version 0.7.0+) that provides a user-configurable interface for launching an "auto-refreshing" or "self-updating" preview of the results of the file being edited in neovim as defined by an arbitrary processing command, and a suitable viewing application of your choice.
+KNAP is a lua plugin for the [neovim](https://neovim.io/) text editor (version 0.7.0+) that provides a user-configurable interface for launching an “auto-refreshing” or “self-updating” preview of the results of the file being edited in neovim as defined by an arbitrary processing command, and a suitable viewing application of your choice.
 
 It was designed with markup-language documents like LaTeX or markdown (or even just HTML) in mind. KNAP allows you to use the PDF viewer or browser of your choice to see the results in real time. Here is a sample of its use with a LaTeX file and its PDF output (here viewed in [llpp](https://github.com/moosotc/llpp)):
 
@@ -11,20 +11,20 @@ Moreover, in principle KNAP could be used for many different purposes, including
 
 For LaTeX it also provides SyncTeX support, and could be extended for similar mechanisms for other formats, if and when they exist.
 
-Similar tools exist. I created KNAP for myself and my own workflow, but perhaps others will find it useful, so I made it public. It's only been tested on Linux; it *might* work on other Unix-y systems like FreeBSD/MacOS X (---it hasn't been tested, but try away---), but likely won't work on Windows without modification. It presupposes you have enough understanding of command line interfaces to configure it properly, though there are some sample configurations below.
+Similar tools exist. I created KNAP for myself and my own workflow, but perhaps others will find it useful, so I made it public. It’s only been tested on Linux; it *might* work on other Unix-y systems like FreeBSD/MacOS X (---it hasn't been tested, but try away---), but likely won’t work on Windows without modification. It presupposes you have enough understanding of command line interfaces to configure it properly, though there are some sample configurations below.
 
 Live-preview of a markdown file, with the Falkon browser:
 
 ![](md-falkon.gif)
 
-*Warning*: Part of the way this works is that your file is constantly saved, with its usual filename. This may be dangerous for some people's workflow, especially those who don't make adequate backups. *Take care not to save over important work if you don't have a way to get it back (e.g., a previous git commit).*
+*Warning*: Part of the way this works is that your file is constantly saved, with its usual filename. This may be dangerous for some people’s workflow, especially those who don’t make adequate backups. *Take care not to save over important work if you don't have a way to get it back (e.g., a previous git commit).*
 
 ## Table of Contents
 
 * [Installation](#installation)
 * [Invocation and Usage](#invocation-and-usage)
 * [Configuring Routines](#configuring-routines)
-* [Settings for SyncTeX or other "Jumps"](#settings-for-synctex-or-other-jumps)
+* [Settings for SyncTeX or other “Jumps”](#settings-for-synctex-or-other-jumps)
 * [Delay Setting / Speed Tuning](#delay-setting--speed-tuning)
 * [Errors During Processing](#errors-during-processing)
 * [Default Configuration](#default-configuration)
@@ -74,11 +74,11 @@ Different package managers work a little differently, so be sure to check the do
 
 #### Other Requirements
 
-Of course, you will also need whatever programs are needed for processing and viewing your files. For the [default configuration](#markdown-header-default-configuration), you'll need [Sioyek](https://sioyek.info) for viewing PDF output, [Falkon browser](https://www.falkon.org/) for html output, [pandoc](https://pandoc.org/) for processing markdown files and a TeX distribution such as [TeXlive](https://www.tug.org/texlive/) for LaTeX files, and [rubber](https://gitlab.com/latex-rubber/rubber/) for reporting LaTeX errors. On Linux, check your package manager to see if these are available in your distro's repos. You don't necessarily need them if you want to use a custom configuration instead.
+Of course, you will also need whatever programs are needed for processing and viewing your files. For the [default configuration](#markdown-header-default-configuration), you'll need [Sioyek](https://sioyek.info) for viewing PDF output, [Falkon browser](https://www.falkon.org/) for html output, [pandoc](https://pandoc.org/) for processing markdown files, a TeX distribution such as [TeXlive](https://www.tug.org/texlive/) for LaTeX files, and [rubber](https://gitlab.com/latex-rubber/rubber/) for reporting LaTeX errors. On Linux, check your package manager to see if these are available in your distro’s repos. You don’t necessarily need them if you want to use a custom configuration instead.
 
 ## Invocation and Usage
 
-Neovim will "lazily" load the plugin only when it is first called with a lua `require` that exposes the functions defined by the plugin. Most likely, you will want to map keys to require and call these functions. There are four functions it makes sense to call directly.
+Neovim will “lazily” load the plugin only when it is first called with a lua `require` that exposes the functions defined by the plugin. Most likely, you will want to map keys to require and call these functions. There are four functions it makes sense to call directly.
 
 If you use the traditional `~/.config/nvim/init.vim` start up script, put something like this in it:
 
@@ -136,7 +136,7 @@ kmap('n','<F8>', function() require("knap").forward_jump() end)
 
 Of course, feel free to choose other keys in place of <kbd>F5</kbd>-<kbd>F8</kbd>.
 
-Here, the important key is <kbd>F7</kbd>. When first pressed, it will call the processing command (e.g., `pdflatex` or `pandoc`), and then open the viewer application. Then once changes are finished being made, after a very short delay, it will call the processing command again, and then send the command to "refresh" or "update" the preview.
+Here, the important key is <kbd>F7</kbd>. When first pressed, it will call the processing command (e.g., `pdflatex` or `pandoc`), and then open the viewer application. Then once changes are finished being made, after a very short delay, it will call the processing command again, and then send the command to “refresh” or “update” the preview.
 
 Press it again to turn it off. When off, <kbd>F5</kbd> would manually process the file once and update the viewer, without this being a repeated cycle. <kbd>F6</kbd> would not only turn off auto-updating, but close the viewer, which is useful if you wish to change settings and use a different viewer, etc. If configured, <kbd>F8</kbd> would make the viewer application jump to the place in the output corresponding to the current cursor position in neovim, as with SyncTeX for LaTeX.
 
@@ -145,8 +145,8 @@ Press it again to turn it off. When off, <kbd>F5</kbd> would manually process th
 Unless you are fully satisfied with the defaults (unlikely), you will need to configure knap. You may use either vimscript or lua for this. You must set one of two [dictionary](https://neovim.io/doc/user/eval.html#Dictionary) variables in neovim before knap is invoked, `g:knap_settings` (global setting; applied to all buffers) or `b:knap_settings` (buffer-specific). For most use cases, `g:knap_settings` is more appropriate. If you use `~/.config/nvim/init.vim`, you might put:
 
 ```vimscript
-let g:knap_settings = { 
-    \ "texoutputext": "pdf", 
+let g:knap_settings = {
+    \ "texoutputext": "pdf",
     \ "textopdf": "pdflatex -synctex=1 -halt-on-error -interaction=batchmode %docroot%",
     \ "textopdfviewerlaunch": "mupdf %outputfile%",
     \ "textopdfviewerrefresh": "kill -HUP %pid%"
@@ -157,7 +157,7 @@ In lua you can assign `vim.b.knap_settings` or `vim.g.knap_settings` to an equiv
 
 ```lua
 local gknapsettings = {
-    texoutputext = "pdf", 
+    texoutputext = "pdf",
     textopdf = "pdflatex -synctex=1 -halt-on-error -interaction=batchmode %docroot%",
     textopdfviewerlaunch = "mupdf %outputfile%",
     textopdfviewerrefresh = "kill -HUP %pid%"
@@ -169,7 +169,7 @@ Most of the lines here are of the form `"setting": "value",`, or, in lua, `setti
 
 The first setting (*outputext* or *output extension*) tells us that when `.tex` files are processed, the results are `.pdf` files, or that `.pdf` files are the files that need to be "previewed" when editing a `.tex` file. This determines what will be done with your file when knap is activated, depending on its extension. (If you are editing a file without an extension, the neovim `&filetype` setting will be used instead.)
 
-This also tells the plugin that the *routine* we are defining is "`textopdf`"; the name of this routine is used in the other settings. Each routine has a name of the form `[input-extension]to[output-extension]`.
+This also tells the plugin that the *routine* we are defining is “`textopdf`”; the name of this routine is used in the other settings. Each routine has a name of the form `[input-extension]to[output-extension]`.
 
 The main setting for the routine, which has the same name as the routine, is the command that is used to process the input file. In the example above, `pdflatex` (with some sane options) needs to be called to produce PDFs from LaTeX files. Someone else might prefer to configure it to use `xelatex` or `latexmk` instead; knap lets the user configure things how they wish.
 
@@ -195,9 +195,9 @@ Quotation marks will be wrapped around the filename variables; do not put additi
 
 Note the commands are always invoked from within the directory of the root document, which may or may not be the same as the document being edited.
 
-KNAP sets no limitations on what routines are defined for what file extensions, or how many routines are set inside `g:knap_settings`. Use a single dictionary for all such settings. For example, to have a routine to create HTML files from Markdown `.md` files, create the settings "`mdoutputext`", "`mdtohtml`", "`mdtohtmlviewerlaunch`" and "`mdtohtmlviewerrefresh`". See the [defaults](#markdown-header-default-configuration) for examples.
+KNAP sets no limitations on what routines are defined for what file extensions, or how many routines are set inside `g:knap_settings`. Use a single dictionary for all such settings. For example, to have a routine to create HTML files from Markdown `.md` files, create the settings “`mdoutputext`”, “`mdtohtml`”, “`mdtohtmlviewerlaunch`” and “`mdtohtmlviewerrefresh`”. See the [defaults](#markdown-header-default-configuration) for examples.
 
-Use the setting "none" in cases when no command needs to be issued to process a kind of file, or to refresh the viewer. (Some viewer applications are self-refreshing!) You can also define routines where the input extension and output extension are the same, e.g., `htmltohtml`, since nothing needs to be done to an html file to make it view-able in a browser.
+Use the setting “none” in cases when no command needs to be issued to process a kind of file, or to refresh the viewer. (Some viewer applications are self-refreshing!) You can also define routines where the input extension and output extension are the same, e.g., `htmltohtml`, since nothing needs to be done to an html file to make it view-able in a browser.
 
 Note also that it is harmless to have settings for different routines for the same input extension in your dictionary. E.g., you might have both `textopdf` and `textodvi` settings; the `texoutputext` variable will determine which one is used by default; however, you could do:
 
@@ -205,13 +205,13 @@ Note also that it is harmless to have settings for different routines for the sa
 
 from the command line in neovim before invoking knap on a TeX file to use the `textodvi` routine to produce `.dvi` files instead of the default `textopdf` routine.
 
-## Settings for SyncTeX or other "Jumps"
+## Settings for SyncTeX or other “Jumps”
 
-If the kind of processing tools and viewer software you're using allow for it, you can create a command that will instruct the viewer to move to the part of the output corresponding to the current location in the source file, or in reverse, to instruct neovim to move to the part of the source corresponding to a portion of the output. This is possible, for example, with SyncTeX for LaTeX files.
+If the kind of processing tools and viewer software you’re using allow for it, you can create a command that will instruct the viewer to move to the part of the output corresponding to the current location in the source file, or in reverse, to instruct neovim to move to the part of the source corresponding to a portion of the output. This is possible, for example, with SyncTeX for LaTeX files.
 
-For "forward" (source → output) jumps, you need to define a setting `[routine]forwardjump`; this may use the same variables as the other settings for the routines, and is where `%line%` and `%column%` are most likely to be relevant. See the default setting for `"textopdfforwardjump"` as an example below.
+For “forward” (source → output) jumps, you need to define a setting `[routine]forwardjump`; this may use the same variables as the other settings for the routines, and is where `%line%` and `%column%` are most likely to be relevant. See the default setting for `"textopdfforwardjump"` as an example below.
 
-For "reverse" or "inverse" (output → source) jumps, you would in most cases configure the viewer to invoke a headless instance of neovim which will send an appropriate signal to the active instance via RPC and then immediately quit.
+For “reverse” or “inverse” (output → source) jumps, you would in most cases configure the viewer to invoke a headless instance of neovim which will send an appropriate signal to the active instance via RPC and then immediately quit.
 
 The `knaphelper.lua` file, when required by a lua command executed by a headless instance of neovim, exposes a function to help with this. The function takes the form `relayjump(servername, filename, line, column)`, which will instruct the neovim instance at `servername` to move its cursor to the specified line and column if `filename` is the file being edited (and just echoes a message otherwise). The viewer or some intermediary must be capable of determining the filename, line and column using SyncTeX or something similar. You could call this function with a headless instance of neovim like this:
 
@@ -225,9 +225,9 @@ If this command can be configured to be used by the viewer in a viewerlaunch or 
 
 Subsequent re-processing of the input file and refreshing the viewer is triggered by changes to the buffer being edited in neovim. Typically, one wishes to finish what one is typing before seeing the result, so there is a short delay between any given change and the start of the processing, and the delay timer is reset with each buffer change. This means that one must at least briefly pause editing before re-processing will start.
 
-This delay is configured in milliseconds. Setting a shorter delay will speed up processing and make it more frequent. Setting this value appropriately involves a trade-off: a lower number is faster, but will make use of more computing resources (processor and memory usage, number of disk writes). 
+This delay is configured in milliseconds. Setting a shorter delay will speed up processing and make it more frequent. Setting this value appropriately involves a trade-off: a lower number is faster, but will make use of more computing resources (processor and memory usage, number of disk writes).
 
-This delay is set to 250 milliseconds (a quarter second) by default. Depending on your hardware and the processing cost of the commands you're using, you may wish to lower or raise this. To do so, include a setting for "delay" in `g:knap_settings`; e.g., for 100 milliseconds, put this in `init.vim`:
+This delay is set to 250 milliseconds (a quarter second) by default. Depending on your hardware and the processing cost of the commands you're using, you may wish to lower or raise this. To do so, include a setting for “delay” in `g:knap_settings`; e.g., for 100 milliseconds, put this in `init.vim`:
 
 ```vimscript
 let g:knap_settings = {
@@ -256,7 +256,7 @@ Or it can be set on an individual basis for a given buffer (before starting the 
 
 If the processing command for the routine finishes with an error (non-zero exit status), an error message will be reported in neovim, and the command to refresh the viewer will not be sent until the command is run again successfully. Typically, the message will include the first line of the stderr stream for the process.
 
-You can fine-tune this by adding a setting of the form `[routine]shorterror` which calls a command to return useful debugging info if one exists instead. The [default configuration](#markdown-header-default-configuration) uses `rubber-info` to collect information of the first error in the LaTeX logs when using the `textopdf` routine.
+You can fine-tune this by adding a setting of the form `[routine]shorterror` which calls a command to return useful debugging info if one exists instead. The [default configuration](#markdown-header-default-configuration) uses `rubber-info` to collect information about the first error in the LaTeX logs when using the `textopdf` routine.
 
 However, knap is not primarily designed to provide debugging or error checking capabilities.
 
@@ -309,29 +309,29 @@ We can see that the commands can look quite complicated. The complexity of the `
 
 ## Setting a Different Root Document
 
-Sometimes the document that needs to be processed is not actually the one being edited. It might be a supplementary file. This would happen with included packages, or subdocuments inserted in LaTeX via `\include` or `\input`. In such cases, the main document is considered the "root document".
+Sometimes the document that needs to be processed is not actually the one being edited. It might be a supplementary file. This would happen with included packages, or subdocuments inserted in LaTeX via `\include` or `\input`. In such cases, the main document is considered the “root document”.
 
-You can tell knap to process a document different from the one being edited by inserting a comment including the string "root = " (without the quotes) in the first five lines of the file. The rest of the line is considered the root document's name. So if editing `chapter1.tex` which is included in `main.tex`, at the top of `chapter1.tex`, you may put:
+You can tell knap to process a document different from the one being edited by inserting a comment including the string “root = ” (without the quotes) in the first five lines of the file. The rest of the line is considered the root document’s name. So if editing `chapter1.tex` which is included in `main.tex`, at the top of `chapter1.tex`, you may put:
 
 `% TeX root = main.tex`
 
 Then it is `main.tex` that will be compiled when knap is invoked on `chapter1.tex`, not `chapter1.tex` itself.
 
-(The "TeX" at the beginning is ignored by knap, but is useful for conformity with other editors and plug-ins that use a similar convention.)
+(The “TeX” at the beginning is ignored by knap, but is useful for conformity with other editors and plug-ins that use a similar convention.)
 
-This might be useful for other sorts of tricks as well. For example, you could set a CSS document's "root" to be an HTML document that uses it, and thereby see the results of editing the CSS in an auto-preview; put:
+This might be useful for other sorts of tricks as well. For example, you could set a CSS document’s “root” to be an HTML document that uses it, and thereby see the results of editing the CSS in an auto-preview; put:
 
 `/* HTML root = index.html */`
 
-Note that it is the *root* document's extension that determines the routine used, so for the above CSS example, the routine is simply `htmltohtml`, and no separate `csstohtml` routine is required. The output file is also considered to have the same base name as the root document, not the edited document.
+Note that it is the *root* document’s extension that determines the routine used, so for the above CSS example, the routine is simply `htmltohtml`, and no separate `csstohtml` routine is required. The output file is also considered to have the same base name as the root document, not the edited document.
 
-However, in such a case, it might be better to use "`touch %outputfile%`" for the main processing command rather than simply "none" if the viewer relies on detecting changes to trigger an auto-refresh. Such is the case with the default configuration and Falkon. Only the CSS file is being changed, so the touch command is needed to mark the HTML file as changed as well, so the refresh will be triggered.
+However, in such a case, it might be better to use “`touch %outputfile%`” for the main processing command rather than simply “none” if the viewer relies on detecting changes to trigger an auto-refresh. Such is the case with the default configuration and Falkon. Only the CSS file is being changed, so the touch command is needed to mark the HTML file as changed as well, so the refresh will be triggered.
 
 ## Buffer-Specific Settings / XeLaTeX Detection Example
 
 If you wish to use different settings for *some* but not all files with a given extension, this can be done in your neovim initialization file, by calling a function that places options in the `b:knap_settings` dictionary variable. (Note: use `b:` here rather than `g:` to avoid affecting all buffers in the neovim instance.)
 
-As an example, here is a snippet you can place in `~/.config/nvim/init.vim` that will detect if a LaTeX file should be processed with `xelatex` rather than `pdflatex`. It does so if "`xelatex`" occurs in the first five lines (such as in a comment), or if the `mathspec` or `fontspec` package is loaded.
+As an example, here is a snippet you can place in `~/.config/nvim/init.vim` that will detect if a LaTeX file should be processed with `xelatex` rather than `pdflatex`. It does so if "`xelatex`" occurs in the first five lines (such as in a comment), or if the `mathspec`, `fontspec` or `unicode-math` package is loaded.
 
 ```vimscript
 function XeLaTeXCheck()
@@ -435,7 +435,7 @@ let g:knap_settings = {
 
 For SyncTeX reverse jumps, one cannot set it up to call a headless instance of neovim directly, as it outputs its arguments to its synctex-command in an incompatible way. One must make use of a helper script. One is provided by the plugin in the form of a luajit script called `synctex-inverse.lua` in the `llpp` subdirectory of the git repository. (It is assumed as a neovim user you have a luajit executable installed.) You should either copy this into a directory in your [`$PATH`](https://astrobiomike.github.io/unix/modifying_your_path), or add the llpp directory of the plugin repo to your `$PATH`, or call it using its full path. You can make it executable with `chmod a+x synctex-inverse.lua` if need be.
 
-Set this lua script as your synctex-command in your `llpp.conf` file (typically at `~/.config/llpp.conf`), under "`<defaults`". If it is in your `$PATH` and executable you can simply do:
+Set this lua script as your synctex-command in your `llpp.conf` file (typically at `~/.config/llpp.conf`), under “`<defaults`”. If it is in your `$PATH` and executable you can simply do:
 
 `synctex-command='synctex-inverse.lua'`
 
@@ -477,7 +477,7 @@ This is the best of the poppler-based viewers for this purpose, and it has excel
 
 Use the `--unique` option to allow refreshing the current document as opposed to opening a new one. Add the `#src` component for SyncTeX jumping and highlighting.
 
-If you enable auto-refresh under Edit > Settings > Behavior in qpdfview, you can set the refresh command to "none".
+If you enable auto-refresh under Edit > Settings > Behavior in qpdfview, you can set the refresh command to “none”.
 
 Example settings in `init.vim` for a `textopdf` routine:
 
@@ -495,7 +495,7 @@ For SyncTeX inverse jumps, under Edit > Settings > Source editor in qpdfview, yo
 
 You can then invoke it with control-click in qpdfview.
 
-If you don't want to use auto-refresh, then use the same command as the launch command for refreshing; you will however probably need to set your window manager to prevent qpdfview from stealing focus while you're typing. (How to do this and whether it can be done will depend on your window manager.)
+If you don’t want to use auto-refresh, then use the same command as the launch command for refreshing; you will however probably need to set your window manager to prevent qpdfview from stealing focus while you’re typing. (How to do this and whether it can be done will depend on your window manager.)
 
 ### Zathura
 
@@ -521,7 +521,7 @@ The above settings directly pass the correct configuration for inverse jumps to 
 
 [okular project page](https://okular.kde.org/)
 
-The capabilities and commands for Okular are quite similar to those for qpdfview. To auto-reload, be sure "Reload document on file change" is checked under Settings > Configure Okular > General. Then you can use "none" for the refresh command. Suggested settings for a `textopdf` routine:
+The capabilities and commands for Okular are quite similar to those for qpdfview. To auto-reload, be sure “Reload document on file change” is checked under Settings > Configure Okular > General. Then you can use “none” for the refresh command. Suggested settings for a `textopdf` routine:
 
 ```vimscript
 let g:knap_settings = {
@@ -531,7 +531,7 @@ let g:knap_settings = {
 \ }
 ```
 
-To configure inverse searches, in Okular, go to Settings > Configure Okular > Editor, choose "Custom Text Editor", and under Command, put:
+To configure inverse searches, in Okular, go to Settings > Configure Okular > Editor, choose “Custom Text Editor”, and under Command, put:
 
 `nvim --headless -es --cmd "lua require('knaphelper').relayjump('all','%f',%l,%c)"`
 
@@ -561,7 +561,7 @@ This works decently well for refreshing the view, but there is no SyncTeX suppor
 
 [evince project page](https://wiki.gnome.org/Apps/Evince)
 
-Evince auto-refreshes so again "none" can be used for that, and always uses a single instance. You can also specify a page number, which provides a simple SyncTeX forward search.
+Evince auto-refreshes so again “none” can be used for that, and always uses a single instance. You can also specify a page number, which provides a simple SyncTeX forward search.
 
 Sample configuration:
 
@@ -573,7 +573,7 @@ let g:knap_settings = {
 \ }
 ```
 
-To get more precise forward searches, or any kind of inverse searches, you'll have to fiddle with DBus or use a DBus wrapper script such as [this](https://github.com/Vinno97/evince-synctex) or [this](https://github.com/latex-lsp/evince-synctex). If someone comes up with precise instructions for this, let me know, and I will post them here. I have never tried this, as it doesn't seem worth it given the better alternatives. (The fact that the GNOME developers don't just put an option in evince to set a custom command shows their increasing disregard for the UNIX philosophy.)
+To get more precise forward searches, or any kind of inverse searches, you’ll have to fiddle with DBus or use a DBus wrapper script such as [this](https://github.com/Vinno97/evince-synctex) or [this](https://github.com/latex-lsp/evince-synctex). If someone comes up with precise instructions for this, let me know, and I will post them here. I have never tried this, as it doesn’t seem worth it given the better alternatives. (The fact that the GNOME developers don't just put an option in evince to set a custom command shows their increasing disregard for the Unix philosophy.)
 
 ## Configuration Hints for HTML Output / Browsers
 
@@ -583,7 +583,7 @@ Again, if you have suggestions for other browsers or approaches, let me know.
 
 [Falkon project page](https://www.falkon.org/)
 
-The KDE Falkon browser (formerly qupzilla) is my preferred solution, as it is a modern-standards browser that auto-reloads local pages (those served with the file:// protocol). Since it reloads for you, you do not need a refresh command. For example, for a `mdtohtml` routine, the default configuration for the `mdtohtml` routine uses simply:
+The KDE Falkon browser (formerly qupzilla) is my preferred solution, as it is a modern-standards browser that auto-reloads local pages (those served with the `file://` protocol). Since it reloads for you, you do not need a refresh command. For example, for a `mdtohtml` routine, the default configuration for the `mdtohtml` routine uses simply:
 
 ```vimscript
 let g:knap_settings = {
@@ -623,7 +623,7 @@ You might also consider using the [live server method](#using-a-live-server-work
 
 ### Firefox, Chrome, Chromium, etc.
 
-The mainstream browsers don't provide an easy way for an external application to refresh the displayed page if it is read directly with the `file://` protocol, at least short of using a webdriver. There are lots of potential workarounds for this, of greater and lesser complexity.
+The mainstream browsers don’t provide an easy way for an external application to refresh the displayed page if it is read directly with the `file://` protocol, at least short of using a webdriver. There are lots of potential workarounds for this, of greater and lesser complexity.
 
 A simple but kludgy way around this is to add a tag of the form `<meta http-equiv="refresh" content="1" >` inside the `<head>...</head>` of the html to instruct the browser to reload the page every second.
 
@@ -641,7 +641,7 @@ let g:knap_settings = {
 ```
 Replace `firefox` above with `chromium` or `google-chrome-stable`, etc., for other popular browsers.
 
-Personally I find just using Falkon to be a simpler approach. Another good alternative is using a live server; see below.
+Another good alternative is using a live server; see below.
 
 ### Using a Live Server (works with any browser)
 
@@ -667,7 +667,7 @@ autocmd BufUnload * lua if (vim.b.knap_viewerpid) then os.execute("pkill -f live
 
 ## Troubleshooting and Workarounds
 
-The developers of PDF viewers/browsers, etc., likely did not foresee their use for this purpose, and because of this, problems can arise. One of the most common issue occurs when the next cycle of the processing begins rewriting an updated version of the output file before the viewer is done reading it from the previous cycle. At worst, this can cause the viewer to malfunction or crash. And even when this doesn’t happen, it can create annoyances such as the viewer “losing your place” in the document and, e.g., scrolling back to the start of the document while you were editing the middle or end.
+The developers of PDF viewers/browsers, etc., likely did not foresee their use for this purpose, and because of this, problems can arise. One of the most common issues occurs when the next cycle of the processing begins rewriting an updated version of the output file before the viewer is done reading it from the previous cycle. At worst, this can cause the viewer to malfunction or crash. And even when this doesn’t happen, it can create annoyances such as the viewer “losing your place” in the document and, e.g., scrolling back to the start of the document while you were editing the middle or end.
 
 If you encounter this kind of difficulty, one thing to consider is raising the processing delay setting to 500 ms or higher; see [the info on this above](#delay-setting--speed-tuning). This might give the viewer the time it needs.
 
@@ -684,7 +684,7 @@ Consider changing it to this:
 
 ```
 
-Since moving a file is a much quicker process than writing it to begin with, this makes it far less likely for there to be a conflict between the routine writing the file and the viewer reading it.
+Since moving a file is a much quicker process than writing it to begin with, this makes it far less likely for there to be a conflict between the routine writing the file and the viewer reading it simultaneously.
 
 
 ## License
