@@ -667,7 +667,25 @@ autocmd BufUnload * lua if (vim.b.knap_viewerpid) then os.execute("pkill -f live
 
 ## Troubleshooting and Workarounds
 
-The developers of the PDF viewers/browsers, etc., likely did not foresee their use for this purpose, and because of this problems can arise. 
+The developers of PDF viewers/browsers, etc., likely did not foresee their use for this purpose, and because of this, problems can arise. One of the most common issue occurs when the next cycle of the processing begins rewriting an updated version of the output file before the viewer is done reading it from the previous cycle. At worst, this can cause the viewer to malfunction or crash. And even when this doesn’t happen, it can create annoyances such as the viewer “losing your place” in the document and, e.g., scrolling back to the start of the document while you were editing the middle or end.
+
+If you encounter this kind of difficulty, one thing to consider is raising the processing delay setting to 500 ms or higher; see [the info on this above](#delay-setting--speed-tuning). This might give the viewer the time it needs.
+
+Another method that often alleviates such problems involves setting the processing command to write to a temporary file and only moving it to the desired location when the processing is completed. For example, suppose your original processing command were something like this:
+
+```
+"mdtohtml" : "pandoc --citeproc --bibliography=mybib.yaml %docroot% > %outputfile%",
+```
+
+Consider changing it to this:
+
+```
+"mdtohtml" : "tempout=\"/tmp/$(basename %outputfile%)\" ; pandoc --citeproc --bibliography=mybib.yaml > \"$tempout\" && mv \"$tempout\" %outputfile%",
+
+```
+
+Since moving a file is a much quicker process than writing it to begin with, this makes it far less likely for there to be a conflict between the routine writing the file and the viewer reading it.
+
 
 ## License
 
