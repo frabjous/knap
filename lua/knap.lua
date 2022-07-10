@@ -120,7 +120,7 @@ function close_viewer()
     end
     if (vim.b.knap_viewerpid) and (is_running(vim.b.knap_viewerpid)) then
         local waskilled = os.execute('kill ' ..
-            tostring(vim.b.knap_viewerpid) .. ' &> /dev/null')
+            tostring(vim.b.knap_viewerpid) .. ' > /dev/null 2>&1')
         -- above returns exit code of kill command
         if not (waskilled == 0) then
             err_msg("Could not kill process " ..
@@ -204,7 +204,7 @@ function forward_jump()
     if (vim.b.knap_docroot) then
         fjprecmd = 'cd "' .. dirname(vim.b.knap_docroot) .. '" && '
     end
-    local result = os.execute(fjprecmd .. fjcmd .. ' &> /dev/null')
+    local result = os.execute(fjprecmd .. fjcmd .. ' > /dev/null 2>&1')
     -- report if error
     if not (result == 0) then
         err_msg("Jump command not successful. (Cmd: " .. fjcmd .. ")")
@@ -276,7 +276,7 @@ end
 -- see if a process is still running
 function is_running(pid)
     -- use ps to see if process is active
-    local running = os.execute('ps -p ' .. tostring(pid) .. ' &> /dev/null')
+    local running = os.execute('ps -p ' .. tostring(pid) .. ' > /dev/null 2>&1')
     if (running == 0) then
         return true
     end
@@ -286,7 +286,7 @@ function is_running(pid)
     local procname = vim.b.knap_viewer_launch_cmd:gsub('.*;%s*','')
     procname = procname:gsub('.*&&%s*','')
     procname = procname:gsub('%s.*','')
-    local running = os.execute('pgrep "' .. procname .. '" &> /dev/null')
+    local running = os.execute('pgrep "' .. procname .. '" > /dev/null 2>&1')
     return (running == 0)
 end
 
@@ -311,7 +311,7 @@ end
 -- run the specified command to open the viewing application
 function launch_viewer()
     -- launch viewer in background and echo pid
-    local lcmd = vim.b.knap_viewer_launch_cmd .. ' &> /dev/null & echo $!'
+    local lcmd = vim.b.knap_viewer_launch_cmd .. ' > /dev/null 2>&1 & echo $!'
     if (vim.b.knap_docroot) then
         lcmd = 'cd "' .. dirname(vim.b.knap_docroot) .. '" && ' .. lcmd
     end
@@ -436,7 +436,7 @@ function refresh_viewer()
         return
     end
     -- execute refresh command
-    local rcmd = '(' .. vim.b.knap_viewer_refresh_cmd .. ') &> /dev/null &'
+    local rcmd = '(' .. vim.b.knap_viewer_refresh_cmd .. ') > /dev/null 2>&1 &'
     if (vim.b.knap_docroot) then
         rcmd = 'cd "' .. dirname(vim.b.knap_docroot) .. '" && ' .. rcmd
     end
