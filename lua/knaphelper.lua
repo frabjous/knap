@@ -19,7 +19,7 @@
 
 -- sends rpc request to server to jump to a certain line and column in
 -- a file
-function relayjump(server, file, line, column)
+local function relayjump(server, file, line, column)
     -- default to column -
     column = column or 0
     -- determine what servers to send to
