@@ -17,36 +17,36 @@ Live-preview of a markdown file, with the Falkon browser:
 
 ![](md-falkon.gif)
 
-*Warning*: Unless you use the “[buffer as stdin](#using-buffer-as-stdin-rather-than-saving)” option, part of the way this works is that your file is constantly saved, with its usual filename. This may be dangerous for some people’s workflow, especially those who don’t make adequate backups. *Take care not to save over important work if you don't have a way to get it back (e.g., a previous git commit).*
+*Warning*: Unless you use the “[buffer as stdin](#user-content-using-buffer-as-stdin-rather-than-saving)” option, part of the way this works is that your file is constantly saved, with its usual filename. This may be dangerous for some people’s workflow, especially those who don’t make adequate backups. *Take care not to save over important work if you don't have a way to get it back (e.g., a previous git commit).*
 
 ## Table of Contents
 
-* [Installation](#installation)
-* [Invocation and Usage](#invocation-and-usage)
-* [Configuring Routines](#configuring-routines)
-* [Settings for SyncTeX or other “Jumps”](#settings-for-synctex-or-other-jumps)
-* [Delay Setting / Speed Tuning](#delay-setting--speed-tuning)
-* [Errors During Processing](#errors-during-processing)
-* [Default Configuration](#default-configuration)
-* [Setting a Different Root Document](#setting-a-different-root-document)
-* [Buffer-Specific Settings / XeLaTeX Detection Example](#buffer-specific-settings--xelatex-detection-example)
-* [Using Buffer As Stdin Rather Than Saving](#using-buffer-as-stdin-rather-than-saving)
-* [Configuration Hints for PDF Viewers](#configuration-hints-for-pdf-viewers)
-    - [Sioyek (recommended viewer)](#sioyek-recommended-viewer)
-    - [llpp](#llpp)
-    - [MuPDF](#mupdf)
-    - [QpdfView](#qpdfview)
-    - [Zathura](#zathura)
-    - [Okular](#okular)
-    - [apvlv](#apvlv)
-    - [Evince (aka GNOME Document Viewer)](#evince-aka-gnome-document-viewer)
-* [Configuration Hints for HTML Output / Browsers](#configuration-hints-for-html-output--browsers)
-    - [Falkon](#falkon-recommended-browser)
-    - [QuteBrowser](#qutebrowser)
-    - [Firefox, Chrome, Chromium, etc.](#firefox-chrome-chromium-etc)
-    - [Using a Live Server (works with any browser)](#using-a-live-server-works-with-any-browser)
-* [Troubleshooting and Workarounds](#troubleshooting-and-workarounds)
-* [License](#license)
+* [Installation](#user-content-installation)
+* [Invocation and Usage](#user-content-invocation-and-usage)
+* [Configuring Routines](#user-content-configuring-routines)
+* [Settings for SyncTeX or other “Jumps”](#user-content-settings-for-synctex-or-other-jumps)
+* [Delay Setting / Speed Tuning](#user-content-delay-setting--speed-tuning)
+* [Errors During Processing](#user-content-errors-during-processing)
+* [Default Configuration](#user-content-default-configuration)
+* [Setting a Different Root Document](#user-content-setting-a-different-root-document)
+* [Buffer-Specific Settings / XeLaTeX Detection Example](#user-content-buffer-specific-settings--xelatex-detection-example)
+* [Using Buffer As Stdin Rather Than Saving](#user-content-using-buffer-as-stdin-rather-than-saving)
+* [Configuration Hints for PDF Viewers](#user-content-configuration-hints-for-pdf-viewers)
+    - [Sioyek (recommended viewer)](#user-content-sioyek-recommended-viewer)
+    - [llpp](#user-content-llpp)
+    - [MuPDF](#user-content-mupdf)
+    - [QpdfView](#user-content-qpdfview)
+    - [Zathura](#user-content-zathura)
+    - [Okular](#user-content-okular)
+    - [apvlv](#user-content-apvlv)
+    - [Evince (aka GNOME Document Viewer)](#user-content-evince-aka-gnome-document-viewer)
+* [Configuration Hints for HTML Output / Browsers](#user-content-configuration-hints-for-html-output--browsers)
+    - [Falkon](#user-content-falkon-recommended-browser)
+    - [QuteBrowser](#user-content-qutebrowser)
+    - [Firefox, Chrome, Chromium, etc.](#user-content-firefox-chrome-chromium-etc)
+    - [Using a Live Server (works with any browser)](#user-content-using-a-live-server-works-with-any-browser)
+* [Troubleshooting and Workarounds](#user-content-troubleshooting-and-workarounds)
+* [License](#user-content-license)
 
 ## Installation
 
@@ -75,7 +75,7 @@ Different package managers work a little differently, so be sure to check the do
 
 #### Other Requirements
 
-Of course, you will also need whatever programs are needed for processing and viewing your files. For the [default configuration](#markdown-header-default-configuration), you'll need [Sioyek](https://sioyek.info) for viewing PDF output, [Falkon browser](https://www.falkon.org/) for html output, [pandoc](https://pandoc.org/) for processing markdown files, a TeX distribution such as [TeXlive](https://www.tug.org/texlive/) for LaTeX files, and [rubber](https://gitlab.com/latex-rubber/rubber/) for reporting LaTeX errors. On Linux, check your package manager to see if these are available in your distro’s repos. You don’t necessarily need them if you want to use a custom configuration instead.
+Of course, you will also need whatever programs are needed for processing and viewing your files. For the [default configuration](#user-content-default-configuration), you'll need [Sioyek](https://sioyek.info) for viewing PDF output, [Falkon browser](https://www.falkon.org/) for html output, [pandoc](https://pandoc.org/) for processing markdown files, a TeX distribution such as [TeXlive](https://www.tug.org/texlive/) for LaTeX files, and [rubber](https://gitlab.com/latex-rubber/rubber/) for reporting LaTeX errors. On Linux, check your package manager to see if these are available in your distro’s repos. You don’t necessarily need them if you want to use a custom configuration instead.
 
 ## Invocation and Usage
 
@@ -188,7 +188,7 @@ When invoked, the appropriate substitutions are made for these variables:
  %servername%  the path to the RPC socket for the current neovim instance (v:servername)
 ```
 
-\* In most use cases, the input document is the same as the one being edited, but see [Setting a Different Root Document](#markdown-header-setting-a-different-root-document) below for discussion of exceptions.
+\* In most use cases, the input document is the same as the one being edited, but see [Setting a Different Root Document](#user-content-setting-a-different-root-document) below for discussion of exceptions.
 
 \*\* The output file is assumed to be the same as the root document with the output extension replacing the input extension of the routine.
 
@@ -196,7 +196,7 @@ Quotation marks will be wrapped around the filename variables; do not put additi
 
 Note the commands are always invoked from within the directory of the root document, which may or may not be the same as the document being edited.
 
-KNAP sets no limitations on what routines are defined for what file extensions, or how many routines are set inside `g:knap_settings`. Use a single dictionary for all such settings. For example, to have a routine to create HTML files from Markdown `.md` files, create the settings “`mdoutputext`”, “`mdtohtml`”, “`mdtohtmlviewerlaunch`” and “`mdtohtmlviewerrefresh`”. See the [defaults](#markdown-header-default-configuration) for examples.
+KNAP sets no limitations on what routines are defined for what file extensions, or how many routines are set inside `g:knap_settings`. Use a single dictionary for all such settings. For example, to have a routine to create HTML files from Markdown `.md` files, create the settings “`mdoutputext`”, “`mdtohtml`”, “`mdtohtmlviewerlaunch`” and “`mdtohtmlviewerrefresh`”. See the [defaults](#user-content-default-configuration) for examples.
 
 Use the setting “none” in cases when no command needs to be issued to process a kind of file, or to refresh the viewer. (Some viewer applications are self-refreshing!) You can also define routines where the input extension and output extension are the same, e.g., `htmltohtml`, since nothing needs to be done to an html file to make it view-able in a browser.
 
@@ -257,11 +257,11 @@ Or it can be set on an individual basis for a given buffer (before starting the 
 
 If the processing command for the routine finishes with an error (non-zero exit status), an error message will be reported in neovim, and the command to refresh the viewer will not be sent until the command is run again successfully. Typically, the message will include the first line of the stderr stream for the process.
 
-You can fine-tune this by adding a setting of the form `[routine]shorterror` which calls a command to return useful debugging info if one exists instead. The [default configuration](#markdown-header-default-configuration) uses `rubber-info` to collect information about the first error in the LaTeX logs when using the `textopdf` routine.
+You can fine-tune this by adding a setting of the form `[routine]shorterror` which calls a command to return useful debugging info if one exists instead. The [default configuration](#user-content-default-configuration) uses `rubber-info` to collect information about the first error in the LaTeX logs when using the `textopdf` routine.
 
 However, knap is not primarily designed to provide debugging or error checking capabilities.
 
-## Default Configuration
+m## Default Configuration
 
 The default settings are used only when neither `g:knap_settings` or `b:knap_settings` is set with the key in question when the plugin is invoked.
 
@@ -306,7 +306,7 @@ The precise values are listed below, here using the lua syntax (though the synta
 }
 ```
 
-We can see that the commands can look quite complicated. The complexity of the `texttopdf` routine commands for sioyek is explained [below](#markdown-header-sioyek-recommended-viewer).
+We can see that the commands can look quite complicated. The complexity of the `texttopdf` routine commands for sioyek is explained [below](#user-content-sioyek-recommended-viewer).
 
 ## Setting a Different Root Document
 
@@ -544,7 +544,7 @@ let g:knap_settings = {
 \ }
 ```
 
-The above settings directly pass the correct configuration for inverse jumps to Zathura when it is launched, again using the kind of convoluted syntax discussed for Sioyek [above](#markdown-header-sioyek-recommended-viewer). Control-click in Zathura to start the jump.
+The above settings directly pass the correct configuration for inverse jumps to Zathura when it is launched, again using the kind of convoluted syntax discussed for Sioyek [above](#user-content-sioyek-recommended-viewer). Control-click in Zathura to start the jump.
 
 ### Okular
 
