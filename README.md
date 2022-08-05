@@ -261,7 +261,7 @@ You can fine-tune this by adding a setting of the form `[routine]shorterror` whi
 
 However, knap is not primarily designed to provide debugging or error checking capabilities.
 
-m## Default Configuration
+## Default Configuration
 
 The default settings are used only when neither `g:knap_settings` or `b:knap_settings` is set with the key in question when the plugin is invoked.
 
