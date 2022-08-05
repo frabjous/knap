@@ -421,7 +421,7 @@ function process_once()
         return
     end
     -- start processing the document
-    start_processing()
+    start_processing('')
 end
 
 -- run command specified to refresh the viewer application
@@ -496,6 +496,7 @@ function set_variables()
     -- determine whether buffer should be send as stdin to processing cmd
     vim.b.knap_buffer_as_stdin = (vim.b.knap_settings[vim.b.knap_routine ..
         'bufferasstdin'] == true)
+    vim.b.knap_last_buf_contents = ''
     -- set viewer launch command or ragequit
     local vlcmd = vim.b.knap_settings[vim.b.knap_routine .. 'viewerlaunch']
     if not (vlcmd) then
@@ -523,11 +524,12 @@ function start_autopreviewing()
     -- new method: attach lua to buffer changes
     attach_to_changes()
     -- start right away
-    start_processing()
+    start_processing('')
 end
 
 -- save and begin the processing command
-function start_processing()
+function start_processing(bufcontents)
+    bufcontents = bufcontents or ''
     vim.b.knap_currently_processing = true
     vim.b.knap_process_stdout = ''
     vim.b.knap_process_stderr = ''
@@ -559,10 +561,16 @@ function start_processing()
         })
     -- send current buffer as stdin in buffer_as_stdin mode
     if (vim.b.knap_buffer_as_stdin) then
+        if (bufcontents == '') then
+            bufcontents = table.concat(api.nvim_buf_get_lines(0,0,-1,false),'\n')
+        end
         -- send buffer as stdin
         vim.fn.chansend(vim.b.knap_process_job,
+            bufcontents
             api.nvim_buf_get_lines(0,0,-1,false)
         )
+        -- save current state of buffer to check if changed
+        vim.b.knap_last_buf_contents = bufcontents
         -- close stdin to the job
         vim.fn.chanclose(vim.b.knap_process_job, 'stdin')
     end
