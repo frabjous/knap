@@ -560,7 +560,7 @@ function start_processing()
     -- send current buffer as stdin in buffer_as_stdin mode
     if (vim.b.knap_buffer_as_stdin) then
         -- send buffer as stdin
-        vim.fn.chansend(vim.b.knap_process.job,
+        vim.fn.chansend(vim.b.knap_process_job,
             api.nvim_buf_get_lines(0,0,-1,false)
         )
         -- close stdin to the job
