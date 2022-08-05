@@ -105,15 +105,27 @@ function buffer_init()
     vim.b.knap_buffer_initialized = true
 end
 
--- checks to see if it should process, and does not if autopreview
--- turned off, the last process is still underway or nothing has changed
+-- checks to see if it should process
 function check_to_process_again()
+    -- do not process if autopreview turned off
+    -- or the last process is still underway
     if not (vim.b.knap_autopreviewing) or
-       (vim.b.knap_currently_processing) or
-       not (vim.opt_local.modified:get()) then
+       (vim.b.knap_currently_processing) then
        return
     end
-    start_processing()
+    -- do not process if nothing has changed
+    local currbufcontents = ''
+    if (vim.b.knap_buffer_as_stdin) then
+        currbufcontents = table.concat(api.nvim_buf_get_lines(0,0,-1,false),'\n')
+        if (currbufcontents == vim.b.knap_last_buf_contents) then
+            return
+        end
+    else
+        if not (vim.opt_local.modified:get()) then
+            return
+        end
+    end
+    start_processing(currbufcontents)
 end
 
 -- sends kill command to the pid of the viewer application
@@ -561,13 +573,13 @@ function start_processing(bufcontents)
         })
     -- send current buffer as stdin in buffer_as_stdin mode
     if (vim.b.knap_buffer_as_stdin) then
+        -- read buffer only if not sent as argument
         if (bufcontents == '') then
             bufcontents = table.concat(api.nvim_buf_get_lines(0,0,-1,false),'\n')
         end
         -- send buffer as stdin
         vim.fn.chansend(vim.b.knap_process_job,
             bufcontents
-            api.nvim_buf_get_lines(0,0,-1,false)
         )
         -- save current state of buffer to check if changed
         vim.b.knap_last_buf_contents = bufcontents
