@@ -29,7 +29,6 @@ local ffi=require('ffi')
 ffi.cdef('int sc_col;')
 local knap_max_col_width = (ffi.C.sc_col - 1)
 
-
 -- make the function names local
 local attach_to_changes, basename, buffer_init, check_to_process_again, close_viewer, dirname, err_msg, fill_in_cmd, forward_jump, get_docroot, get_extension, get_extension_or_ft, get_outputfile, is_running, jump, launch_viewer, mark_viewer_closed, on_exit, on_stderr, on_stdout, process_once, refresh_viewer, restart_timer, set_variables, start_autopreviewing, start_processing, stop_autopreviewing, toggle_autopreviewing
 
@@ -100,7 +99,7 @@ function buffer_init()
     bsettings = vim.tbl_extend("keep", bsettings, dsettings)
     -- set initial variable for buffer
     vim.b.knap_settings = bsettings
-    vim.b.knap_viewer_launched = fals
+    vim.b.knap_viewer_launched = false
     vim.b.knap_autopreviewing = false
     vim.b.knap_currently_processing = false
     vim.b.knap_buffer_initialized = true
@@ -287,6 +286,7 @@ function is_running(pid)
     if not (vim.b.knap_viewer_launch_cmd) then
         return false
     end
+    -- check by process name, which will executable after any ; or &&
     local procname = vim.b.knap_viewer_launch_cmd:gsub('.*;%s*','')
     procname = procname:gsub('.*&&%s*','')
     procname = procname:gsub('%s.*','')
@@ -493,6 +493,9 @@ function set_variables()
         return false
     end
     vim.b.knap_processing_cmd = fill_in_cmd(routinecmd)
+    -- determine whether buffer should be send as stdin to processing cmd
+    vim.b.knap_buffer_as_stdin = (vim.b.knap_settings[vim.b.knap_routine ..
+        'bufferasstdin'] == true)
     -- set viewer launch command or ragequit
     local vlcmd = vim.b.knap_settings[vim.b.knap_routine .. 'viewerlaunch']
     if not (vlcmd) then
@@ -528,8 +531,10 @@ function start_processing()
     vim.b.knap_currently_processing = true
     vim.b.knap_process_stdout = ''
     vim.b.knap_process_stderr = ''
-    -- save file
-    vim.cmd('silent! update')
+    -- save file unless using buffer as stdin
+    if (not(vim.b.knap_buffer_as_stdin)) then
+        vim.cmd('silent! update')
+    end
     -- if processing command is none or blank,
     -- skip right to exiting processing
     if (vim.b.knap_processing_cmd == 'none') or
@@ -537,7 +542,7 @@ function start_processing()
         on_exit(0,0,'exit')
         return
     end
-    -- determine working folder as dirname of edited file
+    -- determine working folder as dirname of edited file or docroot
     local workingdir = ''
     if (vim.b.knap_docroot) then
         workingdir = dirname(vim.b.knap_docroot)
@@ -552,6 +557,15 @@ function start_processing()
             on_stdout = on_stdout,
             on_stderr = on_stderr
         })
+    -- send current buffer as stdin in buffer_as_stdin mode
+    if (vim.b.knap_buffer_as_stdin) then
+        -- send buffer as stdin
+        vim.fn.chansend(vim.b.knap_process.job,
+            api.nvim_buf_get_lines(0,0,-1,false)
+        )
+        -- close stdin to the job
+        vim.fn.chanclose(vim.b.knap_process_job, 'stdin')
+    end
     print("knap routine started")
 end
 
