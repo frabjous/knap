@@ -17,7 +17,7 @@ Live-preview of a markdown file, with the Falkon browser:
 
 ![](md-falkon.gif)
 
-*Warning*: Part of the way this works is that your file is constantly saved, with its usual filename. This may be dangerous for some people’s workflow, especially those who don’t make adequate backups. *Take care not to save over important work if you don't have a way to get it back (e.g., a previous git commit).*
+*Warning*: Unless you use the “[buffer as stdin](#using-buffer-as-stdin-rather-than-saving)” option, part of the way this works is that your file is constantly saved, with its usual filename. This may be dangerous for some people’s workflow, especially those who don’t make adequate backups. *Take care not to save over important work if you don't have a way to get it back (e.g., a previous git commit).*
 
 ## Table of Contents
 
@@ -30,6 +30,7 @@ Live-preview of a markdown file, with the Falkon browser:
 * [Default Configuration](#default-configuration)
 * [Setting a Different Root Document](#setting-a-different-root-document)
 * [Buffer-Specific Settings / XeLaTeX Detection Example](#buffer-specific-settings--xelatex-detection-example)
+* [Using Buffer As Stdin Rather Than Saving](#using-buffer-as-stdin-rather-than-saving)
 * [Configuration Hints for PDF Viewers](#configuration-hints-for-pdf-viewers)
     - [Sioyek (recommended viewer)](#sioyek-recommended-viewer)
     - [llpp](#llpp)
@@ -383,13 +384,41 @@ vim.api.nvim_create_autocmd({'BufRead'}, {pattern = {'*.tex'}, callback = xelate
 
 These are just examples; there are other, possibly better ways of dealing with XeLaTeX detection outside of knap, e.g., by using a processing command that itself does this.
 
+## Using Buffer As Stdin Rather Than Saving
+
+A newly introduced feature allows you to avoid constantly saving over your file. Instead, you may set the routine to send the current contents of the buffer, as it changes, as stdin to the processing command. The file will not be saved each time the routine is called. You are then free to save your file as you normally would in neovim only when you wish to make changes permanent.
+
+To use this option, add a key for `[routine]bufferasstdin` to the settings dictionary and set it to `v:true` in vimscript, or simply `true` in lua. For a “`textopdf`” routine, you might put:
+
+```vimscript
+let g:knap_settings = {
+    \ "textopdf" : "pdflatex -jobname \"$(basename -s .pdf %outputfile%)\" -halt-on-error",
+    \ "textopdfbufferasstdin" : v:true
+\ }
+
+```
+
+Notice you will also need to change the processing command for the routine so that it reads from stdin rather than passing it the input filename or document root filename. All the usual flavors of LaTeX (PDFLaTeX, XeLaTeX, LuaLaTeX, etc.) are happy to read from standard in, though as above, you will need to use the `-jobname` option to ensure you get the right output filename. Unfortunately, using this option will cause SyncTeX not to work. (SyncTeX uses the input filename, which is not available to it with this option, which is why it is not used by default.)
+
+For processing markdown, pandoc is happy to read from stdin as well, but you will need to set its input format with `-f`. E.g., if using lua in your configuration:
+
+```lua
+local gknapsettings = {
+    mdtohtml = "pandoc -f markdown --standalone -o %outputfile%",
+    mdtohtmlbufferasstdin = true
+}
+vim.g.knap_settings = gknapsettings
+```
+
+You may include redirections in your processing command if you need finer grained control of what is done with the buffer contents, such as writing to a temporary file.
+
 ## Configuration Hints for PDF Viewers
 
 If you have managed to configure knap for any other open source PDF viewers, please let me know so I can add to this list.
 
 These are listed roughly in order of how well they work in my experience.
 
-Do not use Adobe Reader. Not just for this, but for anything or any reason. Ever.
+Do not use Adobe Reader. Not just for this, but for anything or any reason.
 
 ### Sioyek (recommended viewer)
 
@@ -657,7 +686,7 @@ let g:knap_settings = {
     "mdtohtmlviewerrefresh": "none",
 \ }
 ```
-You can replace “`firefox`” with the executable name for whichever browser you would prefer to use. It is usually necessary to use the `--wait=` option for live-server to avoid it attempting to reload the output file file before it is completely written, but you may need to tweak the precise value (in milliseconds) depending on the speed of your processing routine.
+You can replace “`firefox`” with the executable name for whichever browser you would prefer to use. It is usually necessary to use the `--wait=` option for live-server to avoid it attempting to reload the output file before it is completely written, but you may need to tweak the precise value (in milliseconds) depending on the speed of your processing routine.
 
 Note that knap spawns its viewer in the background, detached from the neovim process. In order to avoid leaving the server running after you exit neovim, you may wish to add an autocommand to kill all live-server instances upon exit. For instance, in your `init.vim` you could put:
 
@@ -686,13 +715,12 @@ Consider changing it to this:
 
 Since moving a file is a much quicker process than writing it to begin with, this makes it far less likely for there to be a conflict between the routine writing the file and the viewer reading it simultaneously.
 
-
 ## License
 
 [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html). 
 
 KNAP is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-This program is distributed in the hope that it will be useful, but *without any warranty*; without even the implied warranty of *merchantability* or  *fitness for a particular purpose*.  See the [GNU General Public License](https://www.gnu.org/licenses/gpl-3.0.html) for more details.
+This program is distributed in the hope that it will be useful, but *without any warranty*; without even the implied warranty of *merchantability* or *fitness for a particular purpose*. See the [GNU General Public License](https://www.gnu.org/licenses/gpl-3.0.html) for more details.
 
 © 2022 Kevin C. Klement. <klement@umass.edu>
