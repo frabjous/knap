@@ -134,7 +134,7 @@ function close_viewer()
         buffer_init()
     end
     if (vim.b.knap_viewerpid) and (is_running(vim.b.knap_viewerpid)) then
-        local waskilled = os.execute('kill ' ..
+        local waskilled = os.execute('pkill -P ' ..
             tostring(vim.b.knap_viewerpid) .. ' > /dev/null 2>&1')
         -- above returns exit code of kill command
         if not (waskilled == 0) then
