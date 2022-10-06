@@ -378,22 +378,26 @@ function on_exit(jobid, exitcode, event)
         end
     else
         local settings = vim.b.knap_settings
-        if ((settings[vim.b.knap_routine .. "shorterror"] == nil) or
-            (settings[vim.b.knap_routine .. "shorterror"] == "none")) then
-            -- no shorterror routine defined; report some of stderr
+        -- no shorterror routine defined; report some of stderr
+        if (settings[vim.b.knap_routine .. "shorterror"] == nil) then
             err_msg('ERR: ' .. vim.b.knap_process_stderr)
         else
-            -- print result of short error command for routine
-            local shorterrcmd = fill_in_cmd(settings[vim.b.knap_routine ..
-                "shorterror"])
-            if (vim.b.knap_docroot) then
-                shorterrcmd = 'cd "' .. dirname(vim.b.knap_docroot) .. '" && '
-                    .. shorterrcmd
+            if (settings[vim.b.knap_routine .. "shorterror"] == "none") then
+                -- print very generic error
+                err_msg('Process unsuccessful; returned exit code ' .. tostring(exitcode))
+            else
+                -- print result of short error command for routine
+                local shorterrcmd = fill_in_cmd(settings[vim.b.knap_routine ..
+                 "shorterror"])
+                if (vim.b.knap_docroot) then
+                    shorterrcmd = 'cd "' .. dirname(vim.b.knap_docroot) .. '" && '
+                        .. shorterrcmd
+                end
+                local errproc = io.popen(shorterrcmd)
+                local errmsg = vim.trim(errproc:read("*a"))
+                errproc:close()
+                err_msg('ERR: ' .. errmsg)
             end
-            local errproc = io.popen(shorterrcmd)
-            local errmsg = vim.trim(errproc:read("*a"))
-            errproc:close()
-            err_msg('ERR: ' .. errmsg)
         end
     end
     --  check once more in case there are new edits
