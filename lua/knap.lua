@@ -25,9 +25,7 @@ local api = vim.api
 local knaptimer = vim.loop.new_timer()
 
 -- determine maximum width of messages
-local ffi=require('ffi')
-ffi.cdef('int sc_col;')
-local knap_max_col_width = (ffi.C.sc_col - 1)
+local knap_max_col_width = (vim.v.echospace - 1)
 
 -- make the function names local
 local attach_to_changes, basename, buffer_init, check_to_process_again, close_viewer, dirname, err_msg, fill_in_cmd, forward_jump, get_docroot, get_extension, get_extension_or_ft, get_outputfile, is_running, jump, launch_viewer, mark_viewer_closed, on_exit, on_stderr, on_stdout, process_once, refresh_viewer, restart_timer, set_variables, start_autopreviewing, start_processing, stop_autopreviewing, toggle_autopreviewing
