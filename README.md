@@ -75,7 +75,7 @@ Different package managers work a little differently, so be sure to check the do
 
 #### Other Requirements
 
-Of course, you will also need whatever programs are needed for processing and viewing your files. For the [default configuration](#user-content-default-configuration), you'll need [Sioyek](https://sioyek.info) for viewing PDF output, [Falkon browser](https://www.falkon.org/) for html output, [pandoc](https://pandoc.org/) for processing markdown files, a TeX distribution such as [TeXlive](https://www.tug.org/texlive/) for LaTeX files, and [rubber](https://gitlab.com/latex-rubber/rubber/) for reporting LaTeX errors. On Linux, check your package manager to see if these are available in your distro’s repos. You don’t necessarily need them if you want to use a custom configuration instead.
+Of course, you will also need whatever programs are needed for processing and viewing your files. For the [default configuration](#user-content-default-configuration), you'll need [Sioyek](https://sioyek.info) for viewing PDF output, [Falkon browser](https://www.falkon.org/) for html output, [pandoc](https://pandoc.org/) for processing markdown files, a TeX distribution such as [TeXlive](https://www.tug.org/texlive/) for LaTeX files, and [rubber](https://gitlab.com/latex-rubber/rubber/) for reporting LaTeX errors. The default settings assume you are using Sioyek 2.0+. On Linux, check your package manager to see if these are available in your distro’s repos. You don’t necessarily need them if you want to use a custom configuration instead.
 
 ## Invocation and Usage
 
@@ -298,9 +298,9 @@ The precise values are listed below, here using the lua syntax (though the synta
     markdowntopdfviewerrefresh = "none",
     texoutputext = "pdf",
     textopdf = "pdflatex -interaction=batchmode -halt-on-error -synctex=1 %docroot%",
-    textopdfviewerlaunch = "sioyek --inverse-search 'nvim --headless -es --cmd \"lua require('\"'\"'knaphelper'\"'\"').relayjump('\"'\"'%servername%'\"'\"','\"'\"'%1'\"'\"',%2,%3)\"' --reuse-instance %outputfile%",
+    textopdfviewerlaunch = "sioyek --inverse-search 'nvim --headless -es --cmd \"lua require('\"'\"'knaphelper'\"'\"').relayjump('\"'\"'%servername%'\"'\"','\"'\"'%1'\"'\"',%2,%3)\"' --new-window %outputfile%",
     textopdfviewerrefresh = "none",
-    textopdfforwardjump = "sioyek --inverse-search 'nvim --headless -es --cmd \"lua require('\"'\"'knaphelper'\"'\"').relayjump('\"'\"'%servername%'\"'\"','\"'\"'%1'\"'\"',%2,%3)\"' --reuse-instance --forward-search-file %srcfile% --forward-search-line %line% %outputfile%",
+    textopdfforwardjump = "sioyek --inverse-search 'nvim --headless -es --cmd \"lua require('\"'\"'knaphelper'\"'\"').relayjump('\"'\"'%servername%'\"'\"','\"'\"'%1'\"'\"',%2,%3)\"' --reuse-window --forward-search-file %srcfile% --forward-search-line %line% %outputfile%",
     textopdfshorterror = "A=%outputfile% ; LOGFILE=\"${A%.pdf}.log\" ; rubber-info \"$LOGFILE\" 2>&1 | head -n 1",
     delay = 250
 }
@@ -430,15 +430,17 @@ Since it is default, you need not put these settings in your `init.vim` unless y
 
 ```vimscript
 let g:knap_settings = {
-    \ "textopdfviewerlaunch": "sioyek --inverse-search 'nvim --headless -es --cmd \"lua require('\"'\"'knaphelper'\"'\"').relayjump('\"'\"'%servername%'\"'\"','\"'\"'%1'\"'\"',%2,0)\"' --reuse-instance %outputfile%",
+    \ "textopdfviewerlaunch": "sioyek --inverse-search 'nvim --headless -es --cmd \"lua require('\"'\"'knaphelper'\"'\"').relayjump('\"'\"'%servername%'\"'\"','\"'\"'%1'\"'\"',%2,0)\"' --new-windoow %outputfile%",
     \ "textopdfviewerrefresh": "none",
-    \ "textopdfforwardjump": "sioyek --inverse-search 'nvim --headless -es --cmd \"lua require('\"'\"'knaphelper'\"'\"').relayjump('\"'\"'%servername%'\"'\"','\"'\"'%1'\"'\"',%2,0)\"' --reuse-instance --forward-search-file %srcfile% --forward-search-line %line% %outputfile%"
+    \ "textopdfforwardjump": "sioyek --inverse-search 'nvim --headless -es --cmd \"lua require('\"'\"'knaphelper'\"'\"').relayjump('\"'\"'%servername%'\"'\"','\"'\"'%1'\"'\"',%2,0)\"' --reuse-window --forward-search-file %srcfile% --forward-search-line %line% %outputfile%"
 }
 ```
 
 These settings directly pass the correct configuration for inverse jumps to Sioyek when it is launched. Getting this right is difficult. Since this uses the regular vim syntax for forming strings, if a command contains a double quotation mark, it must be escaped as `\"`. This command for inverse searches must be passed as a single argument, so it must be in its own quotes for the shell to interpret it as such. Moreover the command itself involves quoted arguments for the headless neovim instance, which themselves involve quoted lua strings! Since single quotation marks in shell arguments must be inside double quotation marks, and vice versa, and the double quotation marks must be escaped for lua, one ends up with rather convoluted syntax such as `require('\"'\"'knaphelper'\"'\"')` which becomes simply `require('knaphelper')` when all the escaping and shell unquoting is done. (The same complications exist for setting them with lua, as can be seen in the default settings above.)
 
 With the typical configuration, reverse searches in Sioyek are activated by enabling SyncTeX mode with <kbd>F4</kbd> and then right clicking a spot in the PDF.
+
+*Note:* If you are using an older version of Sioyek (below version 2.0), you should change the settings to use `--new-instance` and `--reuse-instance` instead of `--new-window` and `--reuse-window`.
 
 ### llpp
 
