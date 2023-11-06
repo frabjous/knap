@@ -312,12 +312,7 @@ function get_window_id_x11()
   if (vim.b.xwindowid == nil) then
     vim.b.xwindowid=os.getenv("WINDOWID") -- way1 to get windowid
   end
-  if vim.fn.executable('xdotool') ~= 1 then
-      vim.b.xwindowid = -1 -- Can't find xdotool. Way2 can't be done
-  else
-    print("You are using X11. Can't find xdotool")
-  end
-  if (vim.b.xwindowid == nil) then
+  if (vim.b.xwindowid == nil and vim.fn.executable('xdotool') == 1 ) then
     local out = io.popen("xdotool selectwindow") -- way2 to get windowid
     if (out ~= nil) then
       vim.b.xwindowid = out:read("a")
@@ -327,6 +322,9 @@ function get_window_id_x11()
       vim.b.xwindowid = -1 -- if both way can't find windowid
       print("can't find window id. x11")
     end
+  else
+    vim.b.xwindowid = -1 -- Can't find xdotool. Way2 can't be done
+    print("You are using X11, but Can't find xdotool")
   end
   -- when vim.b.xwindowid == -1 it means that we can't find windowid.
   return vim.b.xwindowid
@@ -344,7 +342,7 @@ function focus_window()
     -- This way is not very perfect but work
     -- I don't know how to get something similar to windows id like in X.
     -- So I only activate window which has suffix '.tex'
-    os.execute("busctl --user call org.gnome.Shell /de/lucaswerkmeister/ActivateWindowByTitle de.lucaswerkmeister.ActivateWindowByTitle activateBySuffix s '.tex'")
+    os.execute("busctl --user call org.gnome.Shell /de/lucaswerkmeister/ActivateWindowByTitle de.lucaswerkmeister.ActivateWindowByTitle activateBySuffix s '.tex' > /dev/null")
   end
 end
 
