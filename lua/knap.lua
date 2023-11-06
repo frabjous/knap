@@ -304,22 +304,57 @@ function is_running(pid)
     return (running == 0)
 end
 
+local get_window_id, focus_window
+
+
+--
+function get_window_id()
+  if (vim.b.xwindowid == nil) then
+    vim.b.xwindowid=os.getenv("WINDOWID")
+  end
+  if (vim.b.xwindowid == nil) then
+    local file = io.popen("xdotool selectwindow")
+    if (file ~= nil) then
+      vim.b.xwindowid = file:read("a")
+      file:close()
+      print("click on the vim window")
+    else
+      vim.b.xwindowid = -1
+    end
+  end
+  return vim.b.xwindowid
+end
+
+function focus_window()
+  if (get_window_id() ~= -1) then
+    os.execute('xdotool windowactivate ' .. get_window_id())
+  end
+end
+
 -- move the cursor to a location if the file requested is the current
 -- one, or else just report where it should go
 function jump(filename,line,column)
-    -- compare name of destination with buffer name
-    local jumpbn = basename(filename)
-    local bufbn = basename(api.nvim_buf_get_name(0))
-    if (jumpbn == bufbn) then
-        -- if they match then move cursor
-        api.nvim_win_set_cursor(0,{line,column})
-        print('jumping to line ' .. tostring(line) .. ' col ' ..
-            tostring(column))
-    else
-        -- if not, just report where the destination is
-        print('jump spot at line ' .. tostring(line) .. ' col ' ..
-            tostring(column) .. ' in ' .. filename)
+  local bufnr = vim.fn.bufnr(filename)
+
+  -- switch buffer if opened
+  if (bufnr == -1) then
+    -- open file file if necessary
+    if (not vim.fn.filereadable(filename)) then
+      print('W: jump spot at line ' .. tostring(line) .. ' col ' ..
+          tostring(column) .. ' in ' .. filename)
+      return -- early
     end
+    api.nvim_command("edit " .. vim.fn.fnameescape(filename))
+    bufnr = vim.fn.bufnr(filename)
+    print('jump to line ' .. tostring(line) .. ' in ' .. filename)
+  end
+
+  api.nvim_set_current_buf(bufnr)
+  api.nvim_win_set_cursor(0,{line,column})
+  vim.cmd.normal('z.')
+  focus_window()
+    -- print('jumping to line ' .. tostring(line) .. ' col ' ..
+        -- tostring(column))
 end
 
 -- run the specified command to open the viewing application
