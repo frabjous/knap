@@ -304,30 +304,47 @@ function is_running(pid)
     return (running == 0)
 end
 
-local get_window_id, focus_window
+local get_window_id_x11, focus_window
 
 
 --
-function get_window_id()
+function get_window_id_x11()
   if (vim.b.xwindowid == nil) then
-    vim.b.xwindowid=os.getenv("WINDOWID")
+    vim.b.xwindowid=os.getenv("WINDOWID") -- way1 to get windowid
+  end
+  if vim.fn.executable('xdotool') ~= 1 then
+      vim.b.xwindowid = -1 -- Can't find xdotool. Way2 can't be done
+  else
+    print("You are using X11. Can't find xdotool")
   end
   if (vim.b.xwindowid == nil) then
-    local file = io.popen("xdotool selectwindow")
-    if (file ~= nil) then
-      vim.b.xwindowid = file:read("a")
-      file:close()
-      print("click on the vim window")
+    local out = io.popen("xdotool selectwindow") -- way2 to get windowid
+    if (out ~= nil) then
+      vim.b.xwindowid = out:read("a")
+      out:close()
+      print("click on the vim window") -- to get window id
     else
-      vim.b.xwindowid = -1
+      vim.b.xwindowid = -1 -- if both way can't find windowid
+      print("can't find window id. x11")
     end
   end
+  -- when vim.b.xwindowid == -1 it means that we can't find windowid.
   return vim.b.xwindowid
 end
 
 function focus_window()
-  if (get_window_id() ~= -1) then
-    os.execute('xdotool windowactivate ' .. get_window_id())
+  local xdg_session_type = os.getenv("XDG_SESSION_TYPE")
+  if (xdg_session_type == "x11") then
+    local window_id_x11 = get_window_id_x11()
+    if (window_id_x11 ~= -1) then
+      os.execute('xdotool windowactivate ' .. window_id_x11)
+    end
+  elseif (xdg_session_type == "wayland") then
+    -- https://github.com/lucaswerkmeister/activate-window-by-title
+    -- This way is not very perfect but work
+    -- I don't know how to get something similar to windows id like in X.
+    -- So I only activate window which has suffix '.tex'
+    os.execute("busctl --user call org.gnome.Shell /de/lucaswerkmeister/ActivateWindowByTitle de.lucaswerkmeister.ActivateWindowByTitle activateBySuffix s '.tex'")
   end
 end
 
