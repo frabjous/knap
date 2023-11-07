@@ -312,19 +312,22 @@ function get_window_id_x11()
   if (vim.b.xwindowid == nil) then
     vim.b.xwindowid=os.getenv("WINDOWID") -- way1 to get windowid
   end
-  if (vim.b.xwindowid == nil and vim.fn.executable('xdotool') == 1 ) then
+  if vim.b.xwindowid ~= nil then
+    return vim.b.xwindowid
+  end
+  if (vim.fn.executable('xdotool') == 1 ) then
+    print("Please click on the vim window. Using xdotool selectwindow to get window ID") -- to get window id
     local out = io.popen("xdotool selectwindow") -- way2 to get windowid
     if (out ~= nil) then
       vim.b.xwindowid = out:read("a")
       out:close()
-      print("click on the vim window") -- to get window id
     else
       vim.b.xwindowid = -1 -- if both way can't find windowid
-      print("can't find window id. x11")
+      print("You are using X11. But can't find window id even though xdotool is executable.")
     end
   else
     vim.b.xwindowid = -1 -- Can't find xdotool. Way2 can't be done
-    print("You are using X11, but Can't find xdotool")
+    print("You are using X11. But xdotool is not found")
   end
   -- when vim.b.xwindowid == -1 it means that we can't find windowid.
   return vim.b.xwindowid
@@ -334,6 +337,7 @@ function focus_window()
   local xdg_session_type = os.getenv("XDG_SESSION_TYPE")
   if (xdg_session_type == "x11") then
     local window_id_x11 = get_window_id_x11()
+    -- print(window_id_x11)
     if (window_id_x11 ~= -1) then
       os.execute('xdotool windowactivate ' .. window_id_x11)
     end
