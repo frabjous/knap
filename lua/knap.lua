@@ -346,7 +346,7 @@ function focus_window()
     -- This way is not very perfect but work
     -- I don't know how to get something similar to windows id like in X.
     -- So I only activate window which has suffix '.tex'
-    os.execute("busctl --user call org.gnome.Shell /de/lucaswerkmeister/ActivateWindowByTitle de.lucaswerkmeister.ActivateWindowByTitle activateBySuffix s '.tex' > /dev/null")
+    os.execute("busctl --user call org.gnome.Shell /de/lucaswerkmeister/ActivateWindowByTitle de.lucaswerkmeister.ActivateWindowByTitle activateBySuffix s 'tex' > /dev/null")
   end
 end
 
