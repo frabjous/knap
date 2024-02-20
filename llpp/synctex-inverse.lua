@@ -92,5 +92,5 @@ proc:close()
 local cmd = 'nvim --headless -es --cmd "lua require(\'knaphelper\')' ..
     '.relayjump(\'all\',\'' .. infile .. '\',' .. linenum .. ','
     .. col .. ')"'
-local succ = os.execute(cmd)
+local _,_,succ = os.execute(cmd)
 os.exit(succ)
