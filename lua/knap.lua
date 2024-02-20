@@ -135,7 +135,7 @@ function close_viewer()
         local waskilled = os.execute('pkill -P ' ..
             tostring(vim.b.knap_viewerpid) .. ' > /dev/null 2>&1')
         -- above returns exit code of kill command
-        if not (waskilled == 0) then
+        if not (waskilled) then
             err_msg("Could not kill process " ..
                 tostring(vim.b.knap_viewerpid))
         end
@@ -219,7 +219,7 @@ function forward_jump()
     end
     local result = os.execute(fjprecmd .. fjcmd .. ' > /dev/null 2>&1')
     -- report if error
-    if not (result == 0) then
+    if not (result) then
         err_msg("Jump command not successful. (Cmd: " .. fjcmd .. ")")
     end
 end
@@ -290,7 +290,7 @@ end
 function is_running(pid)
     -- use ps to see if process is active
     local running = os.execute('ps -p ' .. tostring(pid) .. ' > /dev/null 2>&1')
-    if (running == 0) then
+    if (running) then
         return true
     end
     if not (vim.b.knap_viewer_launch_cmd) then
@@ -300,8 +300,8 @@ function is_running(pid)
     local procname = vim.b.knap_viewer_launch_cmd:gsub('.*;%s*','')
     procname = procname:gsub('.*&&%s*','')
     procname = procname:gsub('%s.*','')
-    local running = os.execute('pgrep "' .. procname .. '" > /dev/null 2>&1')
-    return (running == 0)
+    running = os.execute('pgrep "' .. procname .. '" > /dev/null 2>&1')
+    return running
 end
 
 -- move the cursor to a location if the file requested is the current
@@ -460,7 +460,7 @@ function refresh_viewer()
     end
     local succ = os.execute(rcmd)
     -- report if error
-    if not (succ == 0) then
+    if not (succ) then
         err_msg('Error when attempting to refresh viewer.')
     end
 end
