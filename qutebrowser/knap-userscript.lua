@@ -40,8 +40,8 @@ local tabindex = os.getenv("QUTE_TAB_INDEX")
 local qutefifo = os.getenv("QUTE_FIFO")
 
 -- determine where to store information
-local tabinfofile = '/tmp/knap-' .. fileinfobase .. '-qute-tabindex'
-local fifoinfofile = '/tmp/knap-' .. fileinfobase .. '-qute-fifo'
+local tabinfofile = '/dev/shm/knap/knap-' .. fileinfobase .. '-qute-tabindex'
+local fifoinfofile = '/dev/shm/knap/knap-' .. fileinfobase .. '-qute-fifo'
 
 -- write tab index info file
 local f = io.open(tabinfofile, 'w')
