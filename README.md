@@ -214,6 +214,8 @@ nvim --headless -es --cmd "lua require('knaphelper').relayjump('%servername%','%
 
 If this command can be configured to be used by the viewer in a viewerlaunch or viewerrefresh action, `%servername%` may be passed as part of the command using the substitution method mentioned above; the values of `%{filename}%`, `%{line}%` and `%{column}%` must be provided by the viewer or a helper script. Note also that if one uses `'all'` for `servername`, it will relay the command to all instances of neovim whose RPC server socket it can find, which may be useful if there is no easy way to configure the viewer launching the headless instance to use a specific server.
 
+For reverse jump, knap can activate/raise the window to the front. For X system, `xdotool` needs to be installed. For Wayland, I only test on Gnome. In Gnome shell on wayland, one needs to install the gnome shell extension [Activate Window By Title](https://github.com/lucaswerkmeister/activate-window-by-title) and enable it. The solution for Gnome on wayland is not perfect since it is implemented by searching for window that has a name with suffix `.tex`.
+
 ## Delay Setting / Speed Tuning
 
 Subsequent re-processing of the input file and refreshing the viewer is triggered by changes to the buffer being edited in neovim. Typically, one wishes to finish what one is typing before seeing the result, so there is a short delay between any given change and the start of the processing, and the delay timer is reset with each buffer change. This means that one must at least briefly pause editing before re-processing will start.
