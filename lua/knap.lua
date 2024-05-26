@@ -30,6 +30,7 @@ local knap_max_col_width = (vim.v.echospace - 1)
 -- make the function names local
 local attach_to_changes, basename, buffer_init, check_to_process_again, close_viewer, dirname, err_msg, fill_in_cmd, forward_jump, get_docroot, get_extension, get_extension_or_ft, get_outputfile, is_running, jump, launch_viewer, mark_viewer_closed, on_exit, on_stderr, on_stdout, process_once, refresh_viewer, restart_timer, set_variables, start_autopreviewing, start_processing, stop_autopreviewing, toggle_autopreviewing
 
+
 -- this function attaches listeners to buffer events for changes to
 -- the text starts the timer to update the preview
 function attach_to_changes()
@@ -126,16 +127,54 @@ function check_to_process_again()
     start_processing(currbufcontents)
 end
 
+function get_os()
+    local os_current = vim.loop.os_uname().sysname
+    local isWindows,j = string.find(os_current,"Windows")
+
+    if os_current == "Linux" then
+        return "linux"
+    elseif isWindows ~= nil then
+        return "windows"
+    else
+        err_msg("Unknown operating system")
+    end
+end
+local os_cur = get_os()
+
+
+function kill_command()
+    if os_cur == "linux" then
+        return 'pkill -P '
+    elseif os_cur == "windows" then
+        return 'taskkill /PID '
+    else
+        err_msg("Unknown operating system")
+    end
+end
+local kill_com = kill_command()
+
+-- Get null output, according to the OS in use.
+function null_output()
+    if os_cur == "linux" then
+        return '/dev/null'
+    elseif os_cur == "windows" then
+        return 'NUL'
+    else
+        err_msg("Unknown operating system")
+    end
+end
+local null_out = null_output()
+
 -- sends kill command to the pid of the viewer application
 function close_viewer()
     if not (vim.b.knap_buffer_initialized) then
         buffer_init()
     end
     if (vim.b.knap_viewerpid) and (is_running(vim.b.knap_viewerpid)) then
-        local waskilled = os.execute('pkill -P ' ..
-            tostring(vim.b.knap_viewerpid) .. ' > /dev/null 2>&1')
+        local waskilled = os.execute(kill_com ..
+            tostring(vim.b.knap_viewerpid) .. ' > ' .. null_out .. ' 2>&1' )
         -- above returns exit code of kill command
-        if not (waskilled == true or waskilled == 0) then
+        if not (waskilled) then
             err_msg("Could not kill process " ..
                 tostring(vim.b.knap_viewerpid))
         end
@@ -217,9 +256,9 @@ function forward_jump()
     if (vim.b.knap_docroot) then
         fjprecmd = 'cd "' .. dirname(vim.b.knap_docroot) .. '" && '
     end
-    local result = os.execute(fjprecmd .. fjcmd .. ' > /dev/null 2>&1')
+    local result = os.execute(fjprecmd .. fjcmd .. ' > ' .. null_out .. ' 2>&1' )
     -- report if error
-    if not (result == true or result == 0) then
+    if not (result) then
         err_msg("Jump command not successful. (Cmd: " .. fjcmd .. ")")
     end
 end
@@ -289,8 +328,8 @@ end
 -- see if a process is still running
 function is_running(pid)
     -- use ps to see if process is active
-    local running = os.execute('ps -p ' .. tostring(pid) .. ' > /dev/null 2>&1')
-    if (running == true or running == 0) then
+    local running = os.execute('ps -p ' .. tostring(pid) .. ' > ' ..  null_out .. ' 2>&1')
+    if (running) then
         return true
     end
     if not (vim.b.knap_viewer_launch_cmd) then
@@ -300,8 +339,9 @@ function is_running(pid)
     local procname = vim.b.knap_viewer_launch_cmd:gsub('.*;%s*','')
     procname = procname:gsub('.*&&%s*','')
     procname = procname:gsub('%s.*','')
-    running = os.execute('pgrep "' .. procname .. '" > /dev/null 2>&1')
-    return (running == true or running == 0)
+    print('is_running  '.. procname)
+    running = os.execute('pgrep "' .. procname .. '"  > ' ..  null_out .. ' 2>&1' )
+    return running
 end
 
 -- move the cursor to a location if the file requested is the current
@@ -322,29 +362,54 @@ function jump(filename,line,column)
     end
 end
 
+function get_pid_viewer(lcmd)
+    local vpid
+    if (os_cur=="linux") then
+        local lproc = io.popen(lcmd)
+        -- try to read pid
+        vpid = lproc:read()
+        lproc:close()
+        return vpid
+    else 
+        if (os_cur == "windows") then
+            os.execute(lcmd)
+
+            -- TODO get_process_cmd according to OS; test TEX format
+            -- Get process PID
+            local viewer_name = string.match(vim.b.knap_viewer_launch_cmd, "%S+")
+            local get_process_cmd = 'wmic process where "name=\''.. viewer_name ..'.exe\'" get ProcessId /value'
+            local lproc = io.popen(get_process_cmd)
+            local output = lproc:read("*a")
+            lproc:close()
+            vpid = output:match("ProcessId=(%d+)")
+            return vpid
+        end
+    end
+end
 -- run the specified command to open the viewing application
 function launch_viewer()
     -- launch viewer in background and echo pid
-    local lcmd = vim.b.knap_viewer_launch_cmd .. ' > /dev/null 2>&1 & echo $!'
+    local  lcmd = 'start ' ..  vim.b.knap_viewer_launch_cmd .. ' > ' .. null_out .. ' 2>&1'
+
     if (vim.b.knap_docroot) then
         lcmd = 'cd "' .. dirname(vim.b.knap_docroot) .. '" && ' .. lcmd
     end
-    local lproc = io.popen(lcmd)
-    -- try to read pid
-    local vpid = lproc:read()
-    lproc:close()
+
+    local vpid = get_pid_viewer(lcmd)
+
     -- if couldn't read pid then it was a failure
     if not (vpid) or (vpid == '') then
         err_msg("Could not launch viewer.")
         mark_viewer_closed()
         return
     end
+
     -- set variables for viewer
     vim.b.knap_viewerpid = tonumber(vpid)
     vim.b.knap_viewer_launched = 1
     -- set viewer refresh command
     local vwrrefcmd = vim.b.knap_settings[vim.b.knap_routine ..
-        'viewerrefresh'] or 'none';
+    'viewerrefresh'] or 'none';
     vim.b.knap_viewer_refresh_cmd = fill_in_cmd(vwrrefcmd)
 end
 
@@ -454,13 +519,13 @@ function refresh_viewer()
         return
     end
     -- execute refresh command
-    local rcmd = '(' .. vim.b.knap_viewer_refresh_cmd .. ') > /dev/null 2>&1 &'
+    local rcmd = '(' .. vim.b.knap_viewer_refresh_cmd .. ') > ' .. null_out .. ' 2>&1 &'
     if (vim.b.knap_docroot) then
         rcmd = 'cd "' .. dirname(vim.b.knap_docroot) .. '" && ' .. rcmd
     end
     local succ = os.execute(rcmd)
     -- report if error
-    if not (succ == true or succ == 0) then
+    if not (succ) then
         err_msg('Error when attempting to refresh viewer.')
     end
 end
@@ -573,6 +638,7 @@ function start_processing(bufcontents)
             on_stdout = on_stdout,
             on_stderr = on_stderr
         })
+
     -- send current buffer as stdin in buffer_as_stdin mode
     if (vim.b.knap_buffer_as_stdin) then
         -- read buffer only if not sent as argument
@@ -631,5 +697,6 @@ return {
     forward_jump = forward_jump,
     jump = jump,
     process_once = process_once,
-    toggle_autopreviewing = toggle_autopreviewing
+    toggle_autopreviewing = toggle_autopreviewing,
+    get_os = get_os
 }
