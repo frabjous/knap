@@ -390,9 +390,12 @@ function launch_viewer()
     -- launch viewer in background and echo pid
     local  lcmd = '';
     if (os_cur == 'windows') then
-        lmd = lcmd .. 'start '
+        lcmd = lcmd .. 'start '
     end
     lcmd = lcmd ..  vim.b.knap_viewer_launch_cmd .. ' > ' .. null_out .. ' 2>&1'
+    if (os_cur ~= 'windows') then
+        lcmd = lcmd .. ' & echo $!'
+    end
 
     if (vim.b.knap_docroot) then
         lcmd = 'cd "' .. dirname(vim.b.knap_docroot) .. '" && ' .. lcmd
