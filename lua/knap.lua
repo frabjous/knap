@@ -28,7 +28,7 @@ local knaptimer = vim.loop.new_timer()
 local knap_max_col_width = (vim.v.echospace - 1)
 
 -- make the function names local
-local attach_to_changes, basename, buffer_init, check_to_process_again, close_viewer, dirname, err_msg, fill_in_cmd, forward_jump, get_docroot, get_extension, get_extension_or_ft, get_outputfile, is_running, jump, launch_viewer, mark_viewer_closed, on_exit, on_stderr, on_stdout, process_once, refresh_viewer, restart_timer, set_variables, start_autopreviewing, start_processing, stop_autopreviewing, toggle_autopreviewing
+local attach_to_changes, basename, buffer_init, check_to_process_again, close_viewer, dirname, err_msg, fill_in_cmd, forward_jump, get_docroot, get_extension, get_extension_or_ft, get_outputfile, get_os, is_running, jump, launch_viewer, mark_viewer_closed, on_exit, on_stderr, on_stdout, process_once, refresh_viewer, restart_timer, set_variables, start_autopreviewing, start_processing, stop_autopreviewing, toggle_autopreviewing
 
 
 -- this function attaches listeners to buffer events for changes to
@@ -140,7 +140,6 @@ function get_os()
     end
 end
 local os_cur = get_os()
-
 
 function kill_command()
     if os_cur == "linux" then
@@ -370,7 +369,7 @@ function get_pid_viewer(lcmd)
         vpid = lproc:read()
         lproc:close()
         return vpid
-    else 
+    else
         if (os_cur == "windows") then
             os.execute(lcmd)
 
@@ -389,12 +388,17 @@ end
 -- run the specified command to open the viewing application
 function launch_viewer()
     -- launch viewer in background and echo pid
-    local  lcmd = 'start ' ..  vim.b.knap_viewer_launch_cmd .. ' > ' .. null_out .. ' 2>&1'
+    local  lcmd = '';
+    if (os_cur == 'windows') then
+        lmd = lcmd .. 'start '
+    end
+    lcmd = lcmd ..  vim.b.knap_viewer_launch_cmd .. ' > ' .. null_out .. ' 2>&1'
 
     if (vim.b.knap_docroot) then
         lcmd = 'cd "' .. dirname(vim.b.knap_docroot) .. '" && ' .. lcmd
     end
 
+    print(lcmd)
     local vpid = get_pid_viewer(lcmd)
 
     -- if couldn't read pid then it was a failure
@@ -472,14 +476,14 @@ end
 -- process stderr returned from processing routine
 function on_stderr(jobid, data, event)
     -- concat new stderr output to what has been collected
-    vim.b.knap_process_stderr = (vim.b.knap_process_stderr or '') .. 
+    vim.b.knap_process_stderr = (vim.b.knap_process_stderr or '') ..
         table.concat(data,'')
 end
 
 -- process stdout returned from processing routine
 function on_stdout(jobid, data, event)
     -- concat new stdout output to what has been collected
-    vim.b.knap_process_stdout = (vim.b.knap_process_stdout or '') .. 
+    vim.b.knap_process_stdout = (vim.b.knap_process_stdout or '') ..
         table.concat(data,'')
 end
 
@@ -664,7 +668,7 @@ function stop_autopreviewing(report)
         return
     end
     vim.b.knap_autopreviewing = false
-    if (report) then 
+    if (report) then
         print('autopreview stopped')
     end
 end
