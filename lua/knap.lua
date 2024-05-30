@@ -88,9 +88,9 @@ function buffer_init()
         markdowntopdfviewerrefresh = "none",
         texoutputext = "pdf",
         textopdf = "pdflatex -interaction=batchmode -halt-on-error -synctex=1 %docroot%",
-        textopdfviewerlaunch = "sioyek --inverse-search 'nvim --headless -es --cmd \"lua require('\"'\"'knaphelper'\"'\"').relayjump('\"'\"'%servername%'\"'\"','\"'\"'%1'\"'\"',%2,%3)\"' --new-window %outputfile%",
+        textopdfviewerlaunch = "sioyek %outputfile% --new-window --inverse-search 'nvim --headless -c \"lua require('\"'\"'knaphelper'\"'\"').relayjump('\"'\"'%servername%'\"'\"','\"'\"'%1'\"'\"',%2,%3)\"'",
         textopdfviewerrefresh = "none",
-        textopdfforwardjump = "sioyek --inverse-search 'nvim --headless -es --cmd \"lua require('\"'\"'knaphelper'\"'\"').relayjump('\"'\"'%servername%'\"'\"','\"'\"'%1'\"'\"',%2,%3)\"' --reuse-window --forward-search-file %srcfile% --forward-search-line %line% %outputfile%",
+        textopdfforwardjump = "sioyek --inverse-search 'nvim --headless -c \"lua require('\"'\"'knaphelper'\"'\"').relayjump('\"'\"'%servername%'\"'\"','\"'\"'%1'\"'\"',%2,%3)\"' --reuse-window --forward-search-file %srcfile% --forward-search-line %line% %outputfile%",
         textopdfshorterror = "A=%outputfile% ; LOGFILE=\"${A%.pdf}.log\" ; rubber-info \"$LOGFILE\" 2>&1 | head -n 1",
         delay = 250
     }
@@ -343,22 +343,76 @@ function is_running(pid)
     return running
 end
 
+local get_window_id_x11, focus_window
+
+
+--
+function get_window_id_x11()
+  if (vim.b.xwindowid == nil) then
+    vim.b.xwindowid=os.getenv("WINDOWID") -- way1 to get windowid
+  end
+  if vim.b.xwindowid ~= nil then
+    return vim.b.xwindowid
+  end
+  if (vim.fn.executable('xdotool') == 1 ) then
+    print("Please click on the vim window. Using xdotool selectwindow to get window ID") -- to get window id
+    local out = io.popen("xdotool selectwindow") -- way2 to get windowid
+    if (out ~= nil) then
+      vim.b.xwindowid = out:read("a")
+      out:close()
+    else
+      vim.b.xwindowid = -1 -- if both way can't find windowid
+      print("You are using X11. But can't find window id even though xdotool is executable.")
+    end
+  else
+    vim.b.xwindowid = -1 -- Can't find xdotool. Way2 can't be done
+    print("You are using X11. But xdotool is not found")
+  end
+  -- when vim.b.xwindowid == -1 it means that we can't find windowid.
+  return vim.b.xwindowid
+end
+
+function focus_window()
+  local xdg_session_type = os.getenv("XDG_SESSION_TYPE")
+  if (xdg_session_type == "x11") then
+    local window_id_x11 = get_window_id_x11()
+    -- print(window_id_x11)
+    if (window_id_x11 ~= -1) then
+      os.execute('xdotool windowactivate ' .. window_id_x11)
+    end
+  elseif (xdg_session_type == "wayland") then
+    -- https://github.com/lucaswerkmeister/activate-window-by-title
+    -- This way is not very perfect but work
+    -- I don't know how to get something similar to windows id like in X.
+    -- So I only activate window which has suffix '.tex'
+    os.execute("busctl --user call org.gnome.Shell /de/lucaswerkmeister/ActivateWindowByTitle de.lucaswerkmeister.ActivateWindowByTitle activateBySuffix s 'tex' > /dev/null")
+  end
+end
+
 -- move the cursor to a location if the file requested is the current
 -- one, or else just report where it should go
 function jump(filename,line,column)
-    -- compare name of destination with buffer name
-    local jumpbn = basename(filename)
-    local bufbn = basename(api.nvim_buf_get_name(0))
-    if (jumpbn == bufbn) then
-        -- if they match then move cursor
-        api.nvim_win_set_cursor(0,{line,column})
-        print('jumping to line ' .. tostring(line) .. ' col ' ..
-            tostring(column))
-    else
-        -- if not, just report where the destination is
-        print('jump spot at line ' .. tostring(line) .. ' col ' ..
-            tostring(column) .. ' in ' .. filename)
+  local bufnr = vim.fn.bufnr(filename)
+
+  -- switch buffer if opened
+  if (bufnr == -1) then
+    -- open file file if necessary
+    if (not vim.fn.filereadable(filename)) then
+      print('W: jump spot at line ' .. tostring(line) .. ' col ' ..
+          tostring(column) .. ' in ' .. filename)
+      return -- early
     end
+    api.nvim_command("edit " .. vim.fn.fnameescape(filename))
+    bufnr = vim.fn.bufnr(filename)
+    print('jump to line ' .. tostring(line) .. ' in ' .. filename)
+  end
+
+  api.nvim_set_current_buf(bufnr)
+  api.nvim_win_set_cursor(0,{line,column})
+  vim.cmd.normal('z.')
+  focus_window()
+    -- print('jumping to line ' .. tostring(line) .. ' col ' ..
+        -- tostring(column))
 end
 
 function get_pid_viewer(lcmd)
