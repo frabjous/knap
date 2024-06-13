@@ -401,7 +401,6 @@ function launch_viewer()
         lcmd = 'cd "' .. dirname(vim.b.knap_docroot) .. '" && ' .. lcmd
     end
 
-    print(lcmd)
     local vpid = get_pid_viewer(lcmd)
 
     -- if couldn't read pid then it was a failure
