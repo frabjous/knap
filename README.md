@@ -11,7 +11,9 @@ Moreover, in principle KNAP could be used for many different purposes, including
 
 For LaTeX it also provides SyncTeX support, and could be extended for similar mechanisms for other formats, if and when they exist.
 
-Similar tools exist. I created KNAP for myself and my own workflow, but perhaps others will find it useful, so I made it public. It’s only been tested on Linux; it *might* work on other Unix-y systems like FreeBSD/MacOS X (---it hasn't been tested, but try away---), but likely won’t work on Windows without modification. It presupposes you have enough understanding of command line interfaces to configure it properly, though there are some sample configurations below.
+Similar tools exist. I created KNAP for myself and my own workflow, but perhaps others will find it useful, so I made it public.
+
+KNAP has mainly been tested on Linux. There have been changes made recently that may provide Windows support, but the default configuration makes use of some programs unavailable on Linux. See [issue #27](https://github.com/frabjous/knap/issues/27) for a set up that may work for Windows users. KNAP presupposes you have enough understanding of command line interfaces to configure it properly, though there are some sample configurations below.
 
 Live-preview of a markdown file, with the Falkon browser:
 
@@ -341,7 +343,7 @@ function XeLaTeXCheck()
         endif
     endif
     if (l:xelatex == 1)
-        if !exists("b:knap_settings") 
+        if !exists("b:knap_settings")
             let b:knap_settings = {}
         endif
         let b:knap_settings["textopdf"] = "xelatex -interaction=batchmode -halt-on-error -synctex=1 %docroot%"
@@ -368,7 +370,7 @@ _G.xelatexcheck = function()
     end
     if (isxelatex) then
         local knapsettings = vim.b.knap_settings or {}
-        knapsettings["textopdf"] = 
+        knapsettings["textopdf"] =
             'xelatex -interaction=batchmode -halt-on-error -synctex=1 %docroot%'
         vim.b.knap_settings = knapsettings
     end
@@ -713,7 +715,7 @@ Since moving a file is a much quicker process than writing it to begin with, thi
 
 ## License
 
-[GPLv3](https://www.gnu.org/licenses/gpl-3.0.html). 
+[GPLv3](https://www.gnu.org/licenses/gpl-3.0.html).
 
 KNAP is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
