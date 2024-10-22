@@ -131,7 +131,7 @@ function get_os()
     local os_current = vim.loop.os_uname().sysname
     local isWindows,j = string.find(os_current,"Windows")
 
-    if os_current == "Linux" then
+    if os_current == "Linux" or os_current == "Darwin" then
         return "linux"
     elseif isWindows ~= nil then
         return "windows"
